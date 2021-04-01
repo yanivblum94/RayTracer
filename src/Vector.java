@@ -22,7 +22,7 @@ public class Vector {
         return new Vector(x,y,z);
     }
 
-    public static Vector ScalarMultipy(Vector v, float c){
+    public static Vector ScalarMultiply(Vector v, float c){
         return new Vector(v.X * c,v.Y * c, v.Z * c);
     }
 }
