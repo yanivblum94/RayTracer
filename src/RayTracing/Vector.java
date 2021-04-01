@@ -27,4 +27,10 @@ public class Vector {
     public static Vector ScalarMultiply(Vector v, float c){
         return new Vector(v.X * c,v.Y * c, v.Z * c);
     }
+
+    public static void ScalarMultiplyVoid(Vector v, float c){
+        v.X = c * v.X;
+        v.Y = c * v.Y;
+        v.Z = c * v.Z;
+    }
 }
