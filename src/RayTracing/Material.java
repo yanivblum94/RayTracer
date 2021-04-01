@@ -2,15 +2,15 @@ package RayTracing;
 
 public class Material {
 
-    public byte DiffuseColorRed;
-    public byte DiffuseColorGreen;
-    public byte DiffuseColorBlue;
-    public byte SpecularColorRed;
-    public byte SpecularColorGreen;
-    public byte SpecularColorBlue;
+    public double DiffuseColorRed;
+    public double DiffuseColorGreen;
+    public double DiffuseColorBlue;
+    public double SpecularColorRed;
+    public double SpecularColorGreen;
+    public double SpecularColorBlue;
     public double PhongSpecularityCoeffincient;
-    public byte ReflectionColorRed;
-    public byte ReflectionColorGreen;
-    public byte ReflectionColorBlue;
+    public double ReflectionColorRed;
+    public double ReflectionColorGreen;
+    public double ReflectionColorBlue;
     public double Transperency;
 }
