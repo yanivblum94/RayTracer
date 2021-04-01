@@ -7,12 +7,16 @@ import java.util.List;
 public class Scene {
     public Camera Camera;
     public GeneralSettings Settings;
-    public List<Material>  Materials;
-    public List<Sphere> Spheres;
-    public List<Plane> Planes ;
+    public List<Material> Materials;
+    public List<Sphere> Shperes;
+    public List<Plane> Planes;
     public List<Box> Boxes;
-    public List<Light> Lights ;
+    public List<Light> Lights;
+    public Vector Vx;
+    public Vector Vy;
 
+    // to be continued
+    //public static Point FindP0();
     public void InitObjects(){
         this.Camera = new Camera();
         this.Settings = new GeneralSettings();
@@ -23,3 +27,4 @@ public class Scene {
         this.Lights = new ArrayList<Light>();
     }
 }
+
