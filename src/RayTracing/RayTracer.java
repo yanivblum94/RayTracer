@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -19,6 +18,7 @@ public class RayTracer {
 
     public int imageWidth;
     public int imageHeight;
+    public Scene ImageScene;
 
     /**
      * Runs the ray tracer. Takes scene file, output image file and image size as input.
@@ -75,7 +75,8 @@ public class RayTracer {
         int lineNum = 0;
         System.out.println("Started parsing scene file " + sceneFileName);
 
-
+        ImageScene = new Scene();
+        ImageScene.InitObjects();
 
         while ((line = r.readLine()) != null)
         {
@@ -95,43 +96,86 @@ public class RayTracer {
                 if (code.equals("cam"))
                 {
                     // Add code here to parse camera parameters
-
+                    Camera cam = new Camera();
+                    cam.Position = new Vector(Double.parseDouble(params[0]), Double.parseDouble(params[1]), Double.parseDouble(params[2]));
+                    cam.LookAtPoint = new Vector(Double.parseDouble(params[3]), Double.parseDouble(params[4]), Double.parseDouble(params[5]));
+                    cam.UpVector = new Vector(Double.parseDouble(params[6]), Double.parseDouble(params[7]), Double.parseDouble(params[8]));
+                    cam.ScreenDistance = Double.parseDouble(params[9]);
+                    cam.ScreenWidth = Double.parseDouble(params[10]);
+                    ImageScene.Settings.FishEyeLens = (params.length>11) ? Boolean.parseBoolean(params[11]) : false;
+                    cam.K = (params.length>12) ? Double.parseDouble(params[12]) : 0.5;
+                    ImageScene.Camera = cam;
                     System.out.println(String.format("Parsed camera parameters (line %d)", lineNum));
                 }
                 else if (code.equals("set"))
                 {
                     // Add code here to parse general settings parameters
-
+                    ImageScene.Settings.BackgroundColorRed = Double.parseDouble(params[0]);
+                    ImageScene.Settings.BackgroundColorGreen = Double.parseDouble(params[1]);
+                    ImageScene.Settings.BackgroundColorBlue = Double.parseDouble(params[2]);
+                    ImageScene.Settings.NumOfShadowRays = Integer.parseInt(params[3]);
+                    ImageScene.Settings.MaxRecursionLevels = Integer.parseInt(params[4]);
                     System.out.println(String.format("Parsed general settings (line %d)", lineNum));
                 }
                 else if (code.equals("mtl"))
                 {
                     // Add code here to parse material parameters
-
+                    Material mat = new Material();
+                    mat.DiffuseColorRed = Double.parseDouble(params[0]);
+                    mat.DiffuseColorGreen = Double.parseDouble(params[1]);
+                    mat.DiffuseColorBlue = Double.parseDouble(params[2]);
+                    mat.SpecularColorRed = Double.parseDouble(params[3]);
+                    mat.SpecularColorGreen = Double.parseDouble(params[4]);
+                    mat.SpecularColorBlue = Double.parseDouble(params[5]);
+                    mat.ReflectionColorRed = Double.parseDouble(params[6]);
+                    mat.ReflectionColorGreen = Double.parseDouble(params[7]);
+                    mat.ReflectionColorBlue = Double.parseDouble(params[8]);
+                    mat.PhongSpecularityCoeffincient = Double.parseDouble(params[9]);
+                    mat.Transperency = Double.parseDouble(params[10]);
+                    ImageScene.Materials.add(mat);
                     System.out.println(String.format("Parsed material (line %d)", lineNum));
                 }
                 else if (code.equals("sph"))
                 {
                     // Add code here to parse sphere parameters
-
-                    // Example (you can implement this in many different ways!):
-                    // Sphere sphere = new Sphere();
-                    // sphere.setCenter(params[0], params[1], params[2]);
-                    // sphere.setRadius(params[3]);
-                    // sphere.setMaterial(params[4]);
-
+                    Sphere sph = new Sphere();
+                    sph.Center = new Vector(Double.parseDouble(params[0]),Double.parseDouble(params[1]),Double.parseDouble(params[2]));
+                    sph.Radius = Double.parseDouble(params[3]);
+                    sph.SphereMaterial = ImageScene.Materials.get((Integer.parseInt(params[4])) - 1);
+                    ImageScene.Spheres.add(sph);
                     System.out.println(String.format("Parsed sphere (line %d)", lineNum));
                 }
                 else if (code.equals("pln"))
                 {
                     // Add code here to parse plane parameters
-
+                    Plane pln = new Plane();
+                    pln.Normal = new Vector(Double.parseDouble(params[0]),Double.parseDouble(params[1]),Double.parseDouble(params[2]));
+                    pln.Offset = Double.parseDouble(params[3]);
+                    pln.PlaneMaterial = ImageScene.Materials.get((Integer.parseInt(params[4])) - 1);
+                    ImageScene.Planes.add(pln);
                     System.out.println(String.format("Parsed plane (line %d)", lineNum));
+                }
+                else if (code.equals("box"))
+                {
+                    // Add code here to panew Vector(Double.parseDouble(params[0]),Double.parseDouble(params[1]),Double.parseDouble(params[2]));rse box parameters
+                    Box box = new Box();
+                    box.Center = new Vector(Double.parseDouble(params[0]),Double.parseDouble(params[1]),Double.parseDouble(params[2]));
+                    box.Scale = Double.parseDouble(params[3]);
+                    box.BoxMaterial = ImageScene.Materials.get((Integer.parseInt(params[4])) - 1);
+                    System.out.println(String.format("Parsed box (line %d)", lineNum));
                 }
                 else if (code.equals("lgt"))
                 {
                     // Add code here to parse light parameters
-
+                    Light lgt = new Light();
+                    lgt.Position = new Vector(Double.parseDouble(params[0]),Double.parseDouble(params[1]),Double.parseDouble(params[2]));
+                    lgt.RedColor = Double.parseDouble(params[3]);
+                    lgt.GreenColor = Double.parseDouble(params[4]);
+                    lgt.BlueColor = Double.parseDouble(params[5]);
+                    lgt.SpecularIntensity = Double.parseDouble(params[6]);
+                    lgt.ShadowIntensity = Double.parseDouble(params[7]);
+                    lgt.LightRadius = Double.parseDouble(params[8]);
+                    ImageScene.Lights.add(lgt);
                     System.out.println(String.format("Parsed light (line %d)", lineNum));
                 }
                 else
