@@ -1,5 +1,7 @@
 package RayTracing;
 
+import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Scene {
@@ -15,5 +17,14 @@ public class Scene {
 
     // to be continued
     //public static Point FindP0();
+    public void InitObjects(){
+        this.Camera = new Camera();
+        this.Settings = new GeneralSettings();
+        this.Materials = new ArrayList<Material>();
+        this.Spheres = new ArrayList<Sphere>();
+        this.Planes = new ArrayList<Plane>();
+        this.Boxes = new ArrayList<Box>();
+        this.Lights = new ArrayList<Light>();
+    }
 }
 
