@@ -48,4 +48,34 @@ public class Vector {
     public static Vector VectorSubtraction(Vector v, Vector u){
         return new Vector(v.X-u.X,v.Y-u.Y,v.Z-u.Z);
     }
+
+    public static double NormalVal(Vector v){
+        double temp = DotProduct(v,v);
+        return Math.sqrt(temp);
+    }
+
+    public static Vector NormalVector(Vector v){
+        double n = NormalVal(v);
+        if(n==0){return  new Vector(0,0,0);}
+        return new Vector((v.X)/n, (v.Y)/n, (v.Z)/n);
+    }
+
+    public void Normalize(){
+        Vector temp = new Vector(this.X, this.Y, this.Z);
+        double n = NormalVal(temp);
+        if(n==0){
+            this.X=0; this.Y=0; this.Z=0;
+            return;
+        }
+        this.X = this.X/n;
+        this.Y = this.Y/n;
+        this.Z = this.Z/n;
+    }
+
+    public static double Distance(Vector u, Vector v){//return distance between 2 points in the space
+        double res = Math.pow((u.X - v.X) ,2);
+        res += Math.pow((u.Y - v.Y) ,2);
+        res += Math.pow((u.Z - v.Z) ,2);
+        return Math.sqrt(res);
+    }
 }
