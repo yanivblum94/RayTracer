@@ -7,7 +7,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -18,7 +18,6 @@ public class RayTracer {
 
     public int imageWidth;
     public int imageHeight;
-    public Scene ImageScene;
 
     /**
      * Runs the ray tracer. Takes scene file, output image file and image size as input.
@@ -45,12 +44,13 @@ public class RayTracer {
                 tracer.imageHeight = Integer.parseInt(args[3]);
             }
 
-
+            Scene imageScene = new Scene();
+            imageScene.InitObjects();
             // Parse scene file:
-            tracer.parseScene(sceneFileName);
+            tracer.parseScene(sceneFileName,imageScene);
 
             // Render scene:
-            tracer.renderScene(outputFileName);
+            tracer.renderScene(outputFileName, imageScene);
 
 //		} catch (IOException e) {
 //			System.out.println(e.getMessage());
@@ -66,7 +66,7 @@ public class RayTracer {
     /**
      * Parses the scene file and creates the scene. Change this function so it generates the required objects.
      */
-    public void parseScene(String sceneFileName) throws IOException, RayTracerException
+    public void parseScene(String sceneFileName, Scene imageScene) throws IOException, RayTracerException
     {
         FileReader fr = new FileReader(sceneFileName);
 
@@ -74,9 +74,6 @@ public class RayTracer {
         String line = null;
         int lineNum = 0;
         System.out.println("Started parsing scene file " + sceneFileName);
-
-        ImageScene = new Scene();
-        ImageScene.InitObjects();
 
         while ((line = r.readLine()) != null)
         {
@@ -102,19 +99,19 @@ public class RayTracer {
                     cam.UpVector = new Vector(Double.parseDouble(params[6]), Double.parseDouble(params[7]), Double.parseDouble(params[8]));
                     cam.ScreenDistance = Double.parseDouble(params[9]);
                     cam.ScreenWidth = Double.parseDouble(params[10]);
-                    ImageScene.Settings.FishEyeLens = (params.length>11) ? Boolean.parseBoolean(params[11]) : false;
+                    imageScene.Settings.FishEyeLens = (params.length>11) ? Boolean.parseBoolean(params[11]) : false;
                     cam.K = (params.length>12) ? Double.parseDouble(params[12]) : 0.5;
-                    ImageScene.Camera = cam;
+                    imageScene.Camera = cam;
                     System.out.println(String.format("Parsed camera parameters (line %d)", lineNum));
                 }
                 else if (code.equals("set"))
                 {
                     // Add code here to parse general settings parameters
-                    ImageScene.Settings.BackgroundColorRed = Double.parseDouble(params[0]);
-                    ImageScene.Settings.BackgroundColorGreen = Double.parseDouble(params[1]);
-                    ImageScene.Settings.BackgroundColorBlue = Double.parseDouble(params[2]);
-                    ImageScene.Settings.NumOfShadowRays = Integer.parseInt(params[3]);
-                    ImageScene.Settings.MaxRecursionLevels = Integer.parseInt(params[4]);
+                    imageScene.Settings.BackgroundColorRed = Double.parseDouble(params[0]);
+                    imageScene.Settings.BackgroundColorGreen = Double.parseDouble(params[1]);
+                    imageScene.Settings.BackgroundColorBlue = Double.parseDouble(params[2]);
+                    imageScene.Settings.NumOfShadowRays = Integer.parseInt(params[3]);
+                    imageScene.Settings.MaxRecursionLevels = Integer.parseInt(params[4]);
                     System.out.println(String.format("Parsed general settings (line %d)", lineNum));
                 }
                 else if (code.equals("mtl"))
@@ -132,7 +129,7 @@ public class RayTracer {
                     mat.ReflectionColorBlue = Double.parseDouble(params[8]);
                     mat.PhongSpecularityCoeffincient = Double.parseDouble(params[9]);
                     mat.Transperency = Double.parseDouble(params[10]);
-                    ImageScene.Materials.add(mat);
+                    imageScene.Materials.add(mat);
                     System.out.println(String.format("Parsed material (line %d)", lineNum));
                 }
                 else if (code.equals("sph"))
@@ -141,8 +138,8 @@ public class RayTracer {
                     Sphere sph = new Sphere();
                     sph.Center = new Vector(Double.parseDouble(params[0]),Double.parseDouble(params[1]),Double.parseDouble(params[2]));
                     sph.Radius = Double.parseDouble(params[3]);
-                    sph.SphereMaterial = ImageScene.Materials.get((Integer.parseInt(params[4])) - 1);
-                    ImageScene.Spheres.add(sph);
+                    sph.SphereMaterial = imageScene.Materials.get((Integer.parseInt(params[4])) - 1);
+                    imageScene.Spheres.add(sph);
                     System.out.println(String.format("Parsed sphere (line %d)", lineNum));
                 }
                 else if (code.equals("pln"))
@@ -151,8 +148,8 @@ public class RayTracer {
                     Plane pln = new Plane();
                     pln.Normal = new Vector(Double.parseDouble(params[0]),Double.parseDouble(params[1]),Double.parseDouble(params[2]));
                     pln.Offset = Double.parseDouble(params[3]);
-                    pln.PlaneMaterial = ImageScene.Materials.get((Integer.parseInt(params[4])) - 1);
-                    ImageScene.Planes.add(pln);
+                    pln.PlaneMaterial = imageScene.Materials.get((Integer.parseInt(params[4])) - 1);
+                    imageScene.Planes.add(pln);
                     System.out.println(String.format("Parsed plane (line %d)", lineNum));
                 }
                 else if (code.equals("box"))
@@ -161,7 +158,7 @@ public class RayTracer {
                     Box box = new Box();
                     box.Center = new Vector(Double.parseDouble(params[0]),Double.parseDouble(params[1]),Double.parseDouble(params[2]));
                     box.Scale = Double.parseDouble(params[3]);
-                    box.BoxMaterial = ImageScene.Materials.get((Integer.parseInt(params[4])) - 1);
+                    box.BoxMaterial = imageScene.Materials.get((Integer.parseInt(params[4])) - 1);
                     System.out.println(String.format("Parsed box (line %d)", lineNum));
                 }
                 else if (code.equals("lgt"))
@@ -175,7 +172,7 @@ public class RayTracer {
                     lgt.SpecularIntensity = Double.parseDouble(params[6]);
                     lgt.ShadowIntensity = Double.parseDouble(params[7]);
                     lgt.LightRadius = Double.parseDouble(params[8]);
-                    ImageScene.Lights.add(lgt);
+                    imageScene.Lights.add(lgt);
                     System.out.println(String.format("Parsed light (line %d)", lineNum));
                 }
                 else
@@ -187,7 +184,7 @@ public class RayTracer {
 
         // It is recommended that you check here that the scene is valid,
         // for example camera settings and all necessary materials were defined.
-
+        imageScene.PixelSize = imageScene.Camera.ScreenWidth / this.imageWidth;
         System.out.println("Finished parsing scene file " + sceneFileName);
 
     }
@@ -195,14 +192,35 @@ public class RayTracer {
     /**
      * Renders the loaded scene and saves it to the specified file location.
      */
-    public void renderScene(String outputFileName)
+    public void renderScene(String outputFileName,Scene imageScene)
     {
         long startTime = System.currentTimeMillis();
 
         // Create a byte array to hold the pixel data:
         byte[] rgbData = new byte[this.imageWidth * this.imageHeight * 3];
 
+        imageScene.Camera.InitDirectionVectors();
+        Vector screenCenter = Vector.VectorAddition(imageScene.Camera.Position,
+                Vector.ScalarMultiply(imageScene.Camera.LookAtPoint, imageScene.Camera.ScreenDistance)) ;
+        Vector temp = Vector.VectorAddition(Vector.ScalarMultiply(imageScene.Camera.RightVector, imageScene.PixelSize),
+                Vector.ScalarMultiply(imageScene.Camera.UpVector, imageScene.PixelSize));// w*Vx + h*Vy from slides(w=h without division)
+        Vector p0 = Vector.VectorSubtraction(screenCenter, Vector.ScalarMultiply(temp, 0.5));//po = P-0.5w*Vx-0.5h*Vy
 
+        for(int i=0 ; i<this.imageHeight; i++){
+            Vector p = p0;
+            for(int j=0; j<this.imageWidth; j++){
+                Ray ray = new Ray(imageScene.Camera.Position, Vector.VectorSubtraction(p,imageScene.Camera.Position )); // R = E + t* (p-E)
+                ray.Direction.Normalize();//Normalize direction Vector
+                List<Hit> hits = Hit.FindHits(ray, imageScene);
+                Hit closestHit = Hit.FindClosest(hits, imageScene);
+                /*TODO
+                image[i][j] = GetColor(hit);
+                 */
+                p = Vector.VectorAddition(p, Vector.ScalarMultiply(imageScene.Camera.RightVector, imageScene.PixelSize)); // p += Vx from slides
+
+            }
+            p0 = Vector.VectorAddition(p0, Vector.ScalarMultiply(imageScene.Camera.UpVector, imageScene.PixelSize)); // p0 += Vy from slides
+        }
         // Put your ray tracing code here!
         //
         // Write pixel color values in RGB format to rgbData:
