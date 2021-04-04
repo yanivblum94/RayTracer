@@ -10,6 +10,7 @@ public class Vector {
         this.Y = y ;
         this.Z = z ;
     }
+    public Vector(){}
 
     public static double DotProduct(Vector v, Vector u){
         double sum = 0;

@@ -14,11 +14,12 @@ public class Scene {
     public List<Light> Lights;
     public Vector Vx;
     public Vector Vy;
+    public double PixelSize;
+
 
     // to be continued
     //public static Point FindP0();
     public void InitObjects(){
-        this.Camera = new Camera();
         this.Settings = new GeneralSettings();
         this.Materials = new ArrayList<Material>();
         this.Spheres = new ArrayList<Sphere>();
