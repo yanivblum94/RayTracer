@@ -212,7 +212,7 @@ public class RayTracer {
                 Ray ray = new Ray(imageScene.Camera.Position, Vector.VectorSubtraction(p,imageScene.Camera.Position )); // R = E + t* (p-E)
                 ray.Direction.Normalize();//Normalize direction Vector
                 List<Hit> hits = Hit.FindHits(ray, imageScene);
-                Hit closestHit = Hit.FindClosest(hits, imageScene);
+                Hit closestHitFromRay = Hit.FindClosest(hits, ray.Origin);
                 /*TODO
                 image[i][j] = GetColor(hit);
                  */
