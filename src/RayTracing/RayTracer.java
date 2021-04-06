@@ -216,15 +216,13 @@ public class RayTracer {
                     ColorUtils.GetBackgroundColor( rgbData, 3*(j+i*this.imageWidth),imageScene);
                 }
                else {
-                    Hit closestHit = Hit.FindClosest(hits, imageScene);
-
-                    ColorUtils.GetColor(closestHit, rgbData, 3 * (j + i * this.imageWidth), imageScene);
+                    Hit closestHitFromCam = Hit.FindClosest(hits, ray.Origin);
+                    ColorUtils.GetColor(closestHitFromCam, rgbData, 3 * (j + i * this.imageWidth), imageScene);
                }
-                //Hit closestHitFromRay = Hit.FindClosest(hits, ray.Origin);
                 /*TODO
                 image[i][j] = GetColor(hit);
                  */
-                }
+
                 p = Vector.VectorAddition(p, Vector.ScalarMultiply(imageScene.Camera.RightVector, imageScene.PixelSize)); // p += Vx from slides
 
             }
