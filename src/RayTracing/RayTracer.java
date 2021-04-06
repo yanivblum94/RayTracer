@@ -213,6 +213,8 @@ public class RayTracer {
                 ray.Direction.Normalize();//Normalize direction Vector
                 List<Hit> hits = Hit.FindHits(ray, imageScene);
                 Hit closestHit = Hit.FindClosest(hits, imageScene);
+
+                ColorUtills.GetColor(closestHit, rgbData, 3*(j+i*this.imageWidth),imageScene);
                 /*TODO
                 image[i][j] = GetColor(hit);
                  */
