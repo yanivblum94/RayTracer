@@ -12,5 +12,5 @@ public class Material {
     public double ReflectionColorRed;
     public double ReflectionColorGreen;
     public double ReflectionColorBlue;
-    public double Transperency;
+    public double Transparency;
 }
