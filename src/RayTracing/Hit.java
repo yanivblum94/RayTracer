@@ -71,9 +71,8 @@ public class Hit {
     }
 
     public static List<Hit> FindBoxHits(Ray ray, Scene scene) {
-        /*
-        TODO
-         */
+        List<Hit> res = new ArrayList<>();
+        return res;
     }
 
     public static Hit FindClosest(List<Hit> hits, Vector origin){
