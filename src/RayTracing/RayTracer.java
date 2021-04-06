@@ -212,12 +212,16 @@ public class RayTracer {
                 Ray ray = new Ray(imageScene.Camera.Position, Vector.VectorSubtraction(p,imageScene.Camera.Position )); // R = E + t* (p-E)
                 ray.Direction.Normalize();//Normalize direction Vector
                 List<Hit> hits = Hit.FindHits(ray, imageScene);
-                Hit closestHit = Hit.FindClosest(hits, imageScene);
+                if(hits.isEmpty() ){// no hits - need background color
+                    ColorUtils.GetBackgroundColor( rgbData, 3*(j+i*this.imageWidth),imageScene);
+                }else {
+                    Hit closestHit = Hit.FindClosest(hits, imageScene);
 
-                ColorUtills.GetColor(closestHit, rgbData, 3*(j+i*this.imageWidth),imageScene);
+                    ColorUtils.GetColor(closestHit, rgbData, 3 * (j + i * this.imageWidth), imageScene);
                 /*TODO
                 image[i][j] = GetColor(hit);
                  */
+                }
                 p = Vector.VectorAddition(p, Vector.ScalarMultiply(imageScene.Camera.RightVector, imageScene.PixelSize)); // p += Vx from slides
 
             }
