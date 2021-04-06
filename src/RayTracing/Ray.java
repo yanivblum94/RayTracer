@@ -8,4 +8,9 @@ public class Ray {
         Direction = direction;
         Origin = origin;
     }
+
+    public Vector tPointOnRay(double t){
+        Vector temp = Vector.ScalarMultiply(this.Direction, t);
+        return Vector.VectorAddition(this.Origin, temp);
+    }
 }
