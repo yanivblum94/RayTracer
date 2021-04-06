@@ -29,11 +29,11 @@ public class ColorUtils {
 
         }
         red = scene.Settings.BackgroundColorRed*mat.Transparency +
-                mat.DiffuseColorRed*mat.SpecularColorRed*(1-mat.Transparency);
+                (mat.DiffuseColorRed+mat.SpecularColorRed)*(1-mat.Transparency);
         green = scene.Settings.BackgroundColorGreen*mat.Transparency +
-                mat.DiffuseColorGreen*mat.SpecularColorGreen*(1-mat.Transparency);
+                (mat.DiffuseColorGreen+mat.SpecularColorGreen)*(1-mat.Transparency);
         blue = scene.Settings.BackgroundColorBlue*mat.Transparency +
-                mat.DiffuseColorBlue*mat.SpecularColorBlue*(1-mat.Transparency);
+                (mat.DiffuseColorBlue+mat.SpecularColorBlue)*(1-mat.Transparency);
         rgbData[index] = (byte) (255*red) ;
         rgbData[index + 1] = (byte) (255*green) ;
         rgbData[index + 2] = (byte) (255*blue) ;
