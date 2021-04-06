@@ -214,10 +214,13 @@ public class RayTracer {
                 List<Hit> hits = Hit.FindHits(ray, imageScene);
                 if(hits.isEmpty() ){// no hits - need background color
                     ColorUtils.GetBackgroundColor( rgbData, 3*(j+i*this.imageWidth),imageScene);
-                }else {
+                }
+               else {
                     Hit closestHit = Hit.FindClosest(hits, imageScene);
 
                     ColorUtils.GetColor(closestHit, rgbData, 3 * (j + i * this.imageWidth), imageScene);
+               }
+                //Hit closestHitFromRay = Hit.FindClosest(hits, ray.Origin);
                 /*TODO
                 image[i][j] = GetColor(hit);
                  */
