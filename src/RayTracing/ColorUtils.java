@@ -10,7 +10,7 @@ public class ColorUtils {
      */
     public static void GetColor(Hit hit, byte[] rgbData, int index, Scene scene){
         //naive implementation - just the colors from the formula without lights calculations
-        Shapes s = hit.shape;
+        Shapes s = hit.Shape;
         double red, green, blue;
         Material mat;
         switch (s){
