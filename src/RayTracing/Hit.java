@@ -44,7 +44,7 @@ public class Hit {
             Hit hit = new Hit(hitPoint, Shapes.Sphere,
                     scene.Spheres.indexOf(sphere));
             res.add(hit);
-            if(thc == 0){continue;}//in case the hit is tangent
+            if(Math.abs(thc) < 0.001){continue;}//in case the hit is tangent
             t = tca + thc;
             hitPoint = Vector.VectorAddition(ray.Origin,
                     Vector.ScalarMultiply(ray.Direction, t));

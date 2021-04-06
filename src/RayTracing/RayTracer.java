@@ -202,18 +202,20 @@ public class RayTracer {
         imageScene.Camera.InitDirectionVectors();
         Vector screenCenter = Vector.VectorAddition(imageScene.Camera.Position,
                 Vector.ScalarMultiply(imageScene.Camera.LookAtPoint, imageScene.Camera.ScreenDistance)) ;
-        Vector temp = Vector.VectorAddition(Vector.ScalarMultiply(imageScene.Camera.RightVector, imageScene.PixelSize),
-                Vector.ScalarMultiply(imageScene.Camera.UpVector, imageScene.PixelSize));// w*Vx + h*Vy from slides(w=h without division)
-        Vector p0 = Vector.VectorSubtraction(screenCenter, Vector.ScalarMultiply(temp, 0.5));//po = P-0.5w*Vx-0.5h*Vy
-
+        Vector w = Vector.ScalarMultiply(imageScene.Camera.RightVector, 0.5*this.imageWidth);
+        Vector h = Vector.ScalarMultiply(imageScene.Camera.UpVector, 0.5*this.imageHeight);
+        Vector p0 = Vector.VectorSubtraction(screenCenter, w);
+        p0 = Vector.VectorSubtraction(p0, h);
         for(int i=0 ; i<this.imageHeight; i++){
             Vector p = p0;
             for(int j=0; j<this.imageWidth; j++){
                 Ray ray = new Ray(imageScene.Camera.Position, Vector.VectorSubtraction(p,imageScene.Camera.Position )); // R = E + t* (p-E)
                 ray.Direction.Normalize();//Normalize direction Vector
                 List<Hit> hits = Hit.FindHits(ray, imageScene);
-                if(hits.isEmpty() ){// no hits - need background color
+                //System.out.println("number of hits for ray "+i+", "+j+ " : " + hits.size());
+                if(hits.size() == 0){// no hits - need background color
                     ColorUtils.GetBackgroundColor( rgbData, 3*(j+i*this.imageWidth),imageScene);
+
                 }
                else {
                     Hit closestHitFromCam = Hit.FindClosest(hits, ray.Origin);
@@ -223,10 +225,9 @@ public class RayTracer {
                 image[i][j] = GetColor(hit);
                  */
 
-                p = Vector.VectorAddition(p, Vector.ScalarMultiply(imageScene.Camera.RightVector, imageScene.PixelSize)); // p += Vx from slides
-
+                p = Vector.VectorAddition(p, imageScene.Camera.RightVector); // p += Vx from slides
             }
-            p0 = Vector.VectorAddition(p0, Vector.ScalarMultiply(imageScene.Camera.UpVector, imageScene.PixelSize)); // p0 += Vy from slides
+            p0 = Vector.VectorAddition(p0, imageScene.Camera.UpVector); // p0 += Vy from slides
         }
         // Put your ray tracing code here!
         //

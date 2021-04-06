@@ -4,7 +4,7 @@ public class Ray {
     public Vector Direction;
     public Vector Origin;
 
-    public Ray(Vector direction, Vector origin) {
+    public Ray(Vector origin, Vector direction) {
         Direction = direction;
         Origin = origin;
     }
