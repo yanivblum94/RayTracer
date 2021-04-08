@@ -195,17 +195,19 @@ public class RayTracer {
     public void renderScene(String outputFileName,Scene imageScene)
     {
         long startTime = System.currentTimeMillis();
-
+        double pixel = imageScene.Camera.ScreenWidth/imageWidth;
         // Create a byte array to hold the pixel data:
         byte[] rgbData = new byte[this.imageWidth * this.imageHeight * 3];
 
         imageScene.Camera.InitDirectionVectors();
         Vector screenCenter = Vector.VectorAddition(imageScene.Camera.Position,
-                Vector.ScalarMultiply(imageScene.Camera.LookAtPoint, imageScene.Camera.ScreenDistance)) ;
-        Vector w = Vector.ScalarMultiply(imageScene.Camera.RightVector, 0.5*this.imageWidth);
-        Vector h = Vector.ScalarMultiply(imageScene.Camera.UpVector, 0.5*this.imageHeight);
+                Vector.ScalarMultiply(imageScene.Camera.TowardsVector, imageScene.Camera.ScreenDistance)) ;
+        Vector w = Vector.ScalarMultiply(imageScene.Camera.RightVector, 0.5*(this.imageWidth-pixel)*pixel);
+        Vector h = Vector.ScalarMultiply(imageScene.Camera.UpVector, 0.5*(this.imageHeight-pixel)*pixel);
         Vector p0 = Vector.VectorSubtraction(screenCenter, w);
         p0 = Vector.VectorSubtraction(p0, h);
+        imageScene.Camera.Dx = Vector.ScalarMultiply(imageScene.Camera.RightVector,pixel);
+        imageScene.Camera.Dy = Vector.ScalarMultiply(imageScene.Camera.UpVector,pixel);
         for(int i=0 ; i<this.imageHeight; i++){
             Vector p = p0;
             for(int j=0; j<this.imageWidth; j++){
@@ -225,9 +227,9 @@ public class RayTracer {
                 image[i][j] = GetColor(hit);
                  */
 
-                p = Vector.VectorAddition(p, imageScene.Camera.RightVector); // p += Vx from slides
+                p = Vector.VectorAddition(p, imageScene.Camera.Dx); // p += Vx from slides
             }
-            p0 = Vector.VectorAddition(p0, imageScene.Camera.UpVector); // p0 += Vy from slides
+            p0 = Vector.VectorAddition(p0, imageScene.Camera.Dy); // p0 += Vy from slides
         }
         // Put your ray tracing code here!
         //
