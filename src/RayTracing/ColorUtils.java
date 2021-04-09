@@ -31,11 +31,11 @@ public class ColorUtils {
 
         }
         red =
-                (mat.DiffuseColorRed+mat.SpecularColorRed)*(1-mat.Transparency);
+                (mat.DiffuseColorRed)*(1-mat.Transparency);
         green =
-                (mat.DiffuseColorGreen+mat.SpecularColorGreen)*(1-mat.Transparency);
+                (mat.DiffuseColorGreen)*(1-mat.Transparency);
         blue =
-                (mat.DiffuseColorBlue+mat.SpecularColorBlue)*(1-mat.Transparency);
+                (mat.DiffuseColorBlue)*(1-mat.Transparency);
         rgbData[index] = (byte) (255*red);//min(255*red,255) ;
         rgbData[index + 1] = (byte) (255*green) ;
         rgbData[index + 2] = (byte) (255*blue) ;
