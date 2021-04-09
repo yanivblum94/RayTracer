@@ -217,7 +217,7 @@ public class RayTracer {
                 List<Hit> hits = Hit.FindHits(ray, imageScene);
                 System.out.println("number of hits for ray "+row+", "+col+ " : " + hits.size());
                 if(hits.size() == 0){// no hits - need background color
-                    ColorUtils.GetColor(null, rgbData, 3 * (col + row * this.imageWidth), imageScene);
+                    ColorUtils.GetBackgroundColor( rgbData, 3*(col+row*this.imageWidth),imageScene);
                 }
                else {
                     Hit closestHitFromCam = Hit.FindClosest(hits, ray.Origin);
