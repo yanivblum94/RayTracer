@@ -60,9 +60,10 @@ public class Hit {
         for(Plane pln: scene.Planes){
             double a = Vector.DotProduct(pln.Normal, ray.Direction);
             if(Math.abs(a)< 0.001){continue;}//the ray is unified or parallel to the plane
-            double b = Vector.DotProduct(pln.Normal, ray.Origin);
-            double t = -1 * (pln.Offset + b) / a;
-            if(t<0){continue;}//the plane is on the other direction
+            Vector temp = Vector.ScalarMultiply(pln.Normal, pln.Offset);
+            temp = Vector.VectorSubtraction(temp, ray.Origin);
+            double t = (Vector.DotProduct(pln.Normal, temp)) / a;
+            if(t<0){continue;}
             Vector hitPoint = ray.tPointOnRay(t);
             Hit hit = new Hit(hitPoint, Shapes.Plane, scene.Planes.indexOf(pln));
             res.add(hit);

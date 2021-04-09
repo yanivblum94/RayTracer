@@ -16,10 +16,11 @@ public class Camera {
     init Direction Vectors according to what we saw in the lecture
      */
     public void InitDirectionVectors(){
-        //Vector temp = Vector.VectorSubtraction(this.LookAtPoint, this.Position);
-        Vector temp = Vector.VectorSubtraction(this.Position, this.LookAtPoint);
+        Vector temp = Vector.VectorSubtraction(this.LookAtPoint, this.Position);
+        //Vector temp = Vector.VectorSubtraction(this.Position, this.LookAtPoint);
         this.TowardsVector = Vector.NormalVector(temp);
         this.TowardsVector.Normalize();
+        this.UpVector.Normalize();
          temp = Vector.CrossProduct(this.UpVector, this.TowardsVector);
         this.RightVector = Vector.NormalVector(temp);
 

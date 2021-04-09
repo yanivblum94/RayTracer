@@ -201,35 +201,32 @@ public class RayTracer {
 
         imageScene.Camera.InitDirectionVectors();
         Vector screenCenter = Vector.VectorAddition(imageScene.Camera.Position,
-                Vector.ScalarMultiply(imageScene.Camera.TowardsVector, imageScene.Camera.ScreenDistance)) ;
-        Vector w = Vector.ScalarMultiply(imageScene.Camera.RightVector, 0.5*(this.imageWidth-pixel)*pixel);
-        Vector h = Vector.ScalarMultiply(imageScene.Camera.UpVector, 0.5*(this.imageHeight-pixel)*pixel);
-        Vector p0 = Vector.VectorSubtraction(screenCenter, w);
-        p0 = Vector.VectorSubtraction(p0, h);
+                Vector.ScalarMultiply(imageScene.Camera.TowardsVector, imageScene.Camera.ScreenDistance)) ;//screen center = position + distance*towards
+        Vector temp = Vector.VectorAddition(Vector.ScalarMultiply(imageScene.Camera.RightVector, (imageScene.Camera.ScreenWidth - pixel)),
+                Vector.ScalarMultiply(imageScene.Camera.UpVector, imageHeight/500 -pixel)); //temp = (width - pixel size) * Right Vector + (height - pixel size) * Up Vector
+        Vector p0 = Vector.VectorSubtraction(screenCenter, Vector.ScalarMultiply(temp, 0.5));
         imageScene.Camera.Dx = Vector.ScalarMultiply(imageScene.Camera.RightVector,pixel);
         imageScene.Camera.Dy = Vector.ScalarMultiply(imageScene.Camera.UpVector,pixel);
-        for(int i=0 ; i<this.imageHeight; i++){
-            Vector p = p0;
-            for(int j=0; j<this.imageWidth; j++){
-                Ray ray = new Ray(imageScene.Camera.Position, Vector.VectorSubtraction(p,imageScene.Camera.Position )); // R = E + t* (p-E)
+        for(int row=0 ; row<this.imageHeight; row++){
+            for(int col=0; col<this.imageWidth; col++){
+                Vector shift = Vector.VectorAddition(Vector.ScalarMultiply(imageScene.Camera.Dx,col), Vector.ScalarMultiply(imageScene.Camera.Dy,row));
+                Vector currentPixel =   Vector.VectorAddition(p0, shift);
+                Ray ray = new Ray(currentPixel, Vector.VectorSubtraction(currentPixel,imageScene.Camera.Position));
                 ray.Direction.Normalize();//Normalize direction Vector
                 List<Hit> hits = Hit.FindHits(ray, imageScene);
-                //System.out.println("number of hits for ray "+i+", "+j+ " : " + hits.size());
+                //System.out.println("number of hits for ray "+row+", "+col+ " : " + hits.size());
                 if(hits.size() == 0){// no hits - need background color
-                    ColorUtils.GetBackgroundColor( rgbData, 3*(j+i*this.imageWidth),imageScene);
-
+                    ColorUtils.GetBackgroundColor( rgbData, 3*(col+row*this.imageWidth),imageScene);
                 }
                else {
                     Hit closestHitFromCam = Hit.FindClosest(hits, ray.Origin);
-                    ColorUtils.GetColor(closestHitFromCam, rgbData, 3 * (j + i * this.imageWidth), imageScene);
+                    ColorUtils.GetColor(closestHitFromCam, rgbData, 3 * (col + row * this.imageWidth), imageScene);
                }
                 /*TODO
-                image[i][j] = GetColor(hit);
+                image[row][col] = GetColor(hit);
                  */
 
-                p = Vector.VectorAddition(p, imageScene.Camera.Dx); // p += Vx from slides
             }
-            p0 = Vector.VectorAddition(p0, imageScene.Camera.Dy); // p0 += Vy from slides
         }
         // Put your ray tracing code here!
         //
