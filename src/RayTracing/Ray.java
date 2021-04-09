@@ -10,7 +10,7 @@ public class Ray {
     }
 
     public Vector tPointOnRay(double t){
-        Vector temp = Vector.ScalarMultiply(this.Direction, t);
-        return Vector.VectorAddition(this.Origin, temp);
+        Vector temp = Vector.ScalarMultiply(Direction, t);
+        return Vector.VectorAddition(Origin, temp);
     }
 }
