@@ -215,9 +215,9 @@ public class RayTracer {
                 Ray ray = new Ray(currentPixel, Vector.VectorSubtraction(currentPixel,imageScene.Camera.Position));
                 ray.Direction.Normalize();//Normalize direction Vector
                 List<Hit> hits = Hit.FindHits(ray, imageScene);
-                //System.out.println("number of hits for ray "+row+", "+col+ " : " + hits.size());
+                System.out.println("number of hits for ray "+row+", "+col+ " : " + hits.size());
                 if(hits.size() == 0){// no hits - need background color
-                    ColorUtils.GetBackgroundColor( rgbData, 3*(col+row*this.imageWidth),imageScene);
+                    ColorUtils.GetColor(null, rgbData, 3 * (col + row * this.imageWidth), imageScene);
                 }
                else {
                     Hit closestHitFromCam = Hit.FindClosest(hits, ray.Origin);
