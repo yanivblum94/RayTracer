@@ -3,6 +3,8 @@ package RayTracing;
 import java.awt.*;
 import java.util.List;
 
+import static jdk.nashorn.internal.objects.NativeMath.min;
+
 public class ColorUtils {
 
     /*function to calculate color of pixel by updating rgbData array
@@ -28,13 +30,13 @@ public class ColorUtils {
                 return;
 
         }
-        red = scene.Settings.BackgroundColorRed*mat.Transparency +
+        red =
                 (mat.DiffuseColorRed+mat.SpecularColorRed)*(1-mat.Transparency);
-        green = scene.Settings.BackgroundColorGreen*mat.Transparency +
+        green =
                 (mat.DiffuseColorGreen+mat.SpecularColorGreen)*(1-mat.Transparency);
-        blue = scene.Settings.BackgroundColorBlue*mat.Transparency +
+        blue =
                 (mat.DiffuseColorBlue+mat.SpecularColorBlue)*(1-mat.Transparency);
-        rgbData[index] = (byte) (255*red) ;
+        rgbData[index] = (byte) (255*red);//min(255*red,255) ;
         rgbData[index + 1] = (byte) (255*green) ;
         rgbData[index + 2] = (byte) (255*blue) ;
     }
