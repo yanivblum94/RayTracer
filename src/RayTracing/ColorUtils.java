@@ -42,12 +42,12 @@ public class ColorUtils {
     }
 
     /* for a pixel which don't have a hit we define the colors using
-    the background color as defined in teh assignment
+    the background color as defined in the assignment
      */
     public static void GetBackgroundColor(byte[] rgbData, int index, Scene scene){
-        rgbData[index] = (byte) scene.Settings.BackgroundColorRed;
-        rgbData[index+1] = (byte) scene.Settings.BackgroundColorGreen;
-        rgbData[index+2] = (byte) scene.Settings.BackgroundColorBlue;
+        rgbData[index] = (byte) scene.Settings.BackgroundColor.getRed();
+        rgbData[index+1] = (byte) scene.Settings.BackgroundColor.getGreen();
+        rgbData[index+2] = (byte) scene.Settings.BackgroundColor.getBlue();
     }
 }
 
