@@ -134,6 +134,7 @@ public class RayTracer {
                     mat.ReflectionColorBlue = Double.parseDouble(params[8]);
                     mat.PhongSpecularityCoeffincient = Double.parseDouble(params[9]);
                     mat.Transparency = Double.parseDouble(params[10]);
+                    mat.setColors();
                     imageScene.Materials.add(mat);
                     System.out.println(String.format("Parsed material (line %d)", lineNum));
                 }
@@ -177,6 +178,7 @@ public class RayTracer {
                     lgt.SpecularIntensity = Double.parseDouble(params[6]);
                     lgt.ShadowIntensity = Double.parseDouble(params[7]);
                     lgt.LightRadius = Double.parseDouble(params[8]);
+                    lgt.setColor();
                     imageScene.Lights.add(lgt);
                     System.out.println(String.format("Parsed light (line %d)", lineNum));
                 }
@@ -219,7 +221,7 @@ public class RayTracer {
                 Ray ray = new Ray(currentPixel, Vector.VectorSubtraction(currentPixel,imageScene.Camera.Position));
                 ray.Direction.Normalize();//Normalize direction Vector
                 List<Hit> hits = Hit.FindHits(ray, imageScene);
-                System.out.println("number of hits for ray "+row+", "+col+ " : " + hits.size());
+                //System.out.println("number of hits for ray "+row+", "+col+ " : " + hits.size());
                 if(hits.size() == 0){// no hits - need background color
                     ColorUtils.GetBackgroundColor( rgbData, 3*(col+row*this.imageWidth),imageScene);
                 }
