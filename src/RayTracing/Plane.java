@@ -14,9 +14,15 @@ public class Plane {
 
     public Plane(){}
 
+    public Plane(Vector normal, double offset, Material planeMaterial) {
+        Normal = normal;
+        Offset = offset;
+        PlaneMaterial = planeMaterial;
+    }
+
     /*
-        Calculate the offset for the soft shadow light plane
-         */
+            Calculate the offset for the soft shadow light plane
+             */
     public static double CalcOffset(Vector normal, Vector position){
         return (normal.X *(- position.X)) + (normal.Y *(- position.Y)) + (normal.Z *(- position.Z));
     }
