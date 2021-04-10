@@ -26,6 +26,10 @@ public class RayTracer {
 
         try {
 
+            //Vector a = new Vector(1,3,-7);
+            //Vector b = new Vector(-2,3,4);
+           // System.out.println(Plane.CalcOffset(a,b));
+
             RayTracer tracer = new RayTracer();
 
             // Default values:
