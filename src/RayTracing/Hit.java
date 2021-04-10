@@ -1,19 +1,27 @@
 package RayTracing;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class Hit {
     public Vector HitPoint;
     public Shapes Shape;
     public int Index;
+    public Vector Normal;
 
     public Hit(Vector hitPoint, Shapes shape, int index) {
         HitPoint = hitPoint;
         Shape = shape;
         Index = index;
     }
+
+    public Hit(Vector hitPoint, Shapes shape, int index, Vector normal) {
+        HitPoint = hitPoint;
+        Shape = shape;
+        Index = index;
+        Normal = normal;
+    }
+
+    public Hit(){}
 
     public static List<Hit> FindHits(Ray ray, Scene scene){
         List<Hit> res = new ArrayList<Hit>();
@@ -96,8 +104,33 @@ public class Hit {
         return res;
     }
 
+    //using the slabs method from the instructions
     public static List<Hit> FindBoxHits(Ray ray, Scene scene) {
         List<Hit> res = new ArrayList<>();
+        for(Box box : scene.Boxes){
+            List<Plane> planes = box.GenerateBoxPlanes();
+            AbstractMap<Hit, Plane> hits = FindPlaneHitsForBox(ray, planes, scene.Materials.indexOf(box.BoxMaterial)); //finds all the hits with the box planes
+            Hit hit = box.BoxHit(hits, ray);//checks if the ray hits the box, and return the closest hit if so
+            if(hit != null){
+                res.add(hit);
+            }
+        }
+        return res;
+    }
+
+    public static AbstractMap<Hit, Plane> FindPlaneHitsForBox(Ray ray, List<Plane> planes, int index) {
+        AbstractMap<Hit, Plane> res = new HashMap<>();
+        for(Plane pln: planes){
+            double a = Vector.DotProduct(pln.Normal, ray.Direction);
+            if(Math.abs(a)< 0.001){continue;}//the ray is unified or parallel to the plane
+            Vector temp = Vector.ScalarMultiply(pln.Normal, pln.Offset);
+            temp = Vector.VectorSubtraction(temp, ray.Origin);
+            double t = (Vector.DotProduct(pln.Normal, temp)) / a;
+            if(t<0){continue;}
+            Vector hitPoint = ray.tPointOnRay(t);
+            Hit hit = new Hit(hitPoint, Shapes.Plane, index);
+            res.put(hit, pln);
+        }
         return res;
     }
 
