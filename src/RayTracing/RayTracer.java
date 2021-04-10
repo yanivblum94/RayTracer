@@ -130,6 +130,7 @@ public class RayTracer {
                     mat.ReflectionColorBlue = Double.parseDouble(params[8]);
                     mat.PhongSpecularityCoeffincient = Double.parseDouble(params[9]);
                     mat.Transparency = Double.parseDouble(params[10]);
+                    mat.setColors();
                     imageScene.Materials.add(mat);
                     System.out.println(String.format("Parsed material (line %d)", lineNum));
                 }
@@ -173,6 +174,7 @@ public class RayTracer {
                     lgt.SpecularIntensity = Double.parseDouble(params[6]);
                     lgt.ShadowIntensity = Double.parseDouble(params[7]);
                     lgt.LightRadius = Double.parseDouble(params[8]);
+                    lgt.setColor();
                     imageScene.Lights.add(lgt);
                     System.out.println(String.format("Parsed light (line %d)", lineNum));
                 }
