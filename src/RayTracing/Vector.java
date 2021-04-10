@@ -79,4 +79,13 @@ public class Vector {
         res += Math.pow((u.Z - v.Z) ,2);
         return Math.sqrt(res);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vector vector = (Vector) o;
+        return Double.compare(vector.X, X) == 0 && Double.compare(vector.Y, Y) == 0 && Double.compare(vector.Z, Z) == 0;
+    }
+
 }
