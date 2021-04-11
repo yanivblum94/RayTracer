@@ -87,5 +87,16 @@ public class Vector {
         Vector vector = (Vector) o;
         return Double.compare(vector.X, X) == 0 && Double.compare(vector.Y, Y) == 0 && Double.compare(vector.Z, Z) == 0;
     }
+    /* find reflection vector of light hitting surface
+    n should be normalized , l is the vector from the light to shape
+    implemented by the formula on Shading13 PDF
+     */
+    public static Vector getReflection(Vector l, Vector n){
+        Vector temp = Vector.ScalarMultiply(l,2); // temp = 2L
+        double t = Vector.DotProduct(temp,n); // t = 2L*N
+        Vector r = Vector.ScalarMultiply(temp,t); // r = (2L*N)N
+        r = Vector.VectorSubtraction(r,l); // r = (2L*N)N-L
+        return r;
+    }
 
 }
