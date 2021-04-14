@@ -51,6 +51,9 @@ public class Hit {
                 if(roots.length == 1 && roots[0] > 0){
                     Vector hitPoint = ray.tPointOnRay(roots[0]);
                     Hit hit = new Hit(hitPoint, Shapes.Sphere, scene.Spheres.indexOf(sphere));
+                    hit.Normal = Vector.VectorSubtraction(scene.Spheres.get(hit.Index).Center, hitPoint);
+                    hit.Normal = Vector.ScalarMultiply(hit.Normal, -1);
+                    hit.Normal.Normalize();
                     res.add(hit);
                     continue;
                 }
@@ -58,12 +61,18 @@ public class Hit {
                     if(roots[0] > 0){
                         Vector hitPoint = ray.tPointOnRay(roots[0]);
                         Hit hit = new Hit(hitPoint, Shapes.Sphere, scene.Spheres.indexOf(sphere));
+                        hit.Normal = Vector.VectorSubtraction(scene.Spheres.get(hit.Index).Center, hitPoint);
+                        hit.Normal = Vector.ScalarMultiply(hit.Normal, -1);
+                        hit.Normal.Normalize();
                         res.add(hit);
                         continue;
                     }
                     else if(roots[1] > 0){
                         Vector hitPoint = ray.tPointOnRay(roots[1]);
                         Hit hit = new Hit(hitPoint, Shapes.Sphere, scene.Spheres.indexOf(sphere));
+                        hit.Normal = Vector.VectorSubtraction(scene.Spheres.get(hit.Index).Center, hitPoint);
+                        hit.Normal = Vector.ScalarMultiply(hit.Normal, -1);
+                        hit.Normal.Normalize();
                         res.add(hit);
                         continue;
                     }
@@ -99,6 +108,7 @@ public class Hit {
             if(t<0){continue;}
             Vector hitPoint = ray.tPointOnRay(t);
             Hit hit = new Hit(hitPoint, Shapes.Plane, scene.Planes.indexOf(pln));
+            hit.Normal = pln.Normal;
             res.add(hit);
         }
         return res;
