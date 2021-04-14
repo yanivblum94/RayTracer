@@ -96,6 +96,7 @@ public class Vector {
         double t = Vector.DotProduct(temp,n); // t = 2L*N
         Vector r = Vector.ScalarMultiply(temp,t); // r = (2L*N)N
         r = Vector.VectorSubtraction(r,l); // r = (2L*N)N-L
+        r.Normalize();
         return r;
     }
 
