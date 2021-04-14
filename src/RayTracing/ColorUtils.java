@@ -121,6 +121,7 @@ public class ColorUtils {
         Vector newRayDir =Vector.VectorSubtraction(ray.Direction, normalDot);
         newRayDir.Normalize();
         Ray reflecionRay = new Ray(hitPoint.HitPoint, newRayDir);
+
         List<Hit> reflectionHits = Hit.FindHits(reflecionRay, scene);
         Hit closestFromHit;
         Material newMat;
@@ -143,7 +144,8 @@ public class ColorUtils {
                     break;
             }
         }
-        Color color = CalcColor(scene, closestFromHit, newMat, closestFromHit.Normal, reflecionRay);
+        Vector norm = closestFromHit != null ? closestFromHit.Normal : null;
+        Color color = CalcColor(scene, closestFromHit, newMat, norm, reflecionRay);
         color = GetTransparency(closestFromHit, scene, newMat, reflecionRay, color);
         Color reflection = GetReflection(reflecionRay, closestFromHit, newMat, recursion-1, scene);
         color = plus(color, reflection);
@@ -156,6 +158,8 @@ public class ColorUtils {
         if(hit == null || mat.Transparency ==0.0){
             return color;
         }
+        int objects = scene.Planes.size() + scene.Spheres.size()*2 + scene.Boxes.size()*2;
+        int count = 0;
         Ray trans = new Ray(hit.HitPoint, ray.Direction);
         List<Hit> transHits = Hit.FindHits(trans, scene);
         Material matAfter = null;
@@ -180,7 +184,7 @@ public class ColorUtils {
         Vector normal = hitAfter!= null ? hitAfter.Normal : null;
         Color after = mult(CalcColor(scene, hitAfter, matAfter, normal , trans), transparency);
         color = plus(color, after);
-        while(transHits.size() >0) {
+        while(transHits.size() >0 && count < objects) {
             hitAfter = Hit.FindClosest(transHits, ray.Origin);
             Shapes s = hitAfter.Shape;
             switch (s) {
@@ -204,7 +208,9 @@ public class ColorUtils {
             color = plus(color, after);
             Ray rayAfter = new Ray(hitAfter.HitPoint, ray.Direction);
             transHits = Hit.FindHits(rayAfter, scene);
+            count++;
         }
+        //System.out.println("exited while in trans");
         return color;
     }
     public static Color avgColor(List<Color> colors) {

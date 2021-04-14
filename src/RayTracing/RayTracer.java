@@ -201,6 +201,7 @@ public class RayTracer {
      */
     public void renderScene(String outputFileName,Scene imageScene)
     {
+        System.out.println("started rendering");
         long startTime = System.currentTimeMillis();
         double pixel = imageScene.Camera.ScreenWidth/imageWidth;
         // Create a byte array to hold the pixel data:
