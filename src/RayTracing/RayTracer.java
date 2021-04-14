@@ -227,7 +227,7 @@ public class RayTracer {
                 }
                else {
                     Hit closestHitFromCam = Hit.FindClosest(hits, ray.Origin);
-                    ColorUtils.GetColor(closestHitFromCam, rgbData, 3 * (col + row * this.imageWidth), imageScene);
+                    ColorUtils.GetColor(closestHitFromCam, rgbData, 3 * (col + row * this.imageWidth), imageScene,ray);
                }
                 /*TODO
                 image[row][col] = GetColor(hit);

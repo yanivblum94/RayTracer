@@ -24,6 +24,5 @@ public class Camera {
         this.UpVector = Vector.ScalarMultiply(this.UpVector, -1);
          temp = Vector.CrossProduct(this.TowardsVector, this.UpVector);
         this.RightVector = Vector.NormalVector(temp);
-
     }
 }

@@ -148,4 +148,11 @@ public class Hit {
         }
         return res;
     }
+/*
+    public static boolean equal(Hit a, Hit b){
+
+        if(a.Shape )
+        return (a.HitPoint == b.HitPoint);
+    }
+*/
 }
