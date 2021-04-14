@@ -39,6 +39,9 @@ public class ColorUtils {
         //System.out.println("before getDiffuseColor");
         normal.Normalize();
         c = CalcColor(scene, hit, mat, normal, ray);
+        c = GetTransparency(hit, scene, mat, ray, c);
+        Color ref = GetReflection(ray, hit, mat, scene.Settings.MaxRecursionLevels, scene);
+        c = plus(c,ref);
         // ADD REflection & Transparency
         setColor(rgbData,index, c);
         //System.out.println(count);
@@ -46,6 +49,9 @@ public class ColorUtils {
     }
 
     public static Color CalcColor(Scene scene,Hit hit,Material mat,Vector normal,Ray ray){
+        if(hit == null){
+            return scene.Settings.BackgroundColor;
+        }
         Color res = getDiffuseColor(scene, hit, mat, normal, ray);
         return res;
     }
@@ -118,26 +124,89 @@ public class ColorUtils {
         newRayDir.Normalize();
         Ray reflecionRay = new Ray(hitPoint.HitPoint, newRayDir);
         List<Hit> reflectionHits = Hit.FindHits(reflecionRay, scene);
-        Hit closestFromHit = Hit.FindClosest(reflectionHits, ray.Origin);
+        Hit closestFromHit;
         Material newMat;
-        Shapes s = closestFromHit.Shape;
-        switch (s) {
-            case Sphere:
-                newMat = scene.Spheres.get(closestFromHit.Index).SphereMaterial;
-                break;
-            case Plane:
-                newMat = scene.Planes.get(closestFromHit.Index).PlaneMaterial;
-                break;
-            default:
-                newMat = scene.Boxes.get(closestFromHit.Index).BoxMaterial;
-                break;
+        if(reflectionHits.size() ==0){
+            closestFromHit = null;
+            newMat = null;
+        }
+        else {
+            closestFromHit = Hit.FindClosest(reflectionHits, ray.Origin);
+            Shapes s = closestFromHit.Shape;
+            switch (s) {
+                case Sphere:
+                    newMat = scene.Spheres.get(closestFromHit.Index).SphereMaterial;
+                    break;
+                case Plane:
+                    newMat = scene.Planes.get(closestFromHit.Index).PlaneMaterial;
+                    break;
+                default:
+                    newMat = scene.Boxes.get(closestFromHit.Index).BoxMaterial;
+                    break;
+            }
         }
         Color color = CalcColor(scene, closestFromHit, newMat, closestFromHit.Normal, reflecionRay);
-        //color = GetTransparency(closestFromHit, scene, newMat, reflecionRay, color);
+        color = GetTransparency(closestFromHit, scene, newMat, reflecionRay, color);
         Color reflection = GetReflection(reflecionRay, closestFromHit, newMat, recursion-1, scene);
         color = plus(color, reflection);
         color = mult(color, mat.RelectionColor);
 
+        return color;
+    }
+
+    public static Color GetTransparency(Hit hit, Scene scene, Material mat, Ray ray, Color color){
+        if(hit == null || mat.Transparency ==0.0){
+            return color;
+        }
+        Ray trans = new Ray(hit.HitPoint, ray.Direction);
+        List<Hit> transHits = Hit.FindHits(trans, scene);
+        Material matAfter = null;
+        Hit hitAfter =null;
+        if(transHits.size() >0){
+            hitAfter = Hit.FindClosest(transHits, ray.Origin);
+            Shapes s = hitAfter.Shape;
+            switch (s) {
+                case Sphere:
+                    matAfter = scene.Spheres.get(hitAfter.Index).SphereMaterial;
+                    break;
+                case Plane:
+                    matAfter = scene.Planes.get(hitAfter.Index).PlaneMaterial;
+                    break;
+                default:
+                    matAfter = scene.Boxes.get(hitAfter.Index).BoxMaterial;
+                    break;
+            }
+        }
+        float transparency = (float) mat.Transparency;
+        color = mult(color, (1-transparency));
+        Vector normal = hitAfter!= null ? hitAfter.Normal : null;
+        Color after = mult(CalcColor(scene, hitAfter, matAfter, normal , trans), transparency);
+        color = plus(color, after);
+        while(transHits.size() >0) {
+            hitAfter = Hit.FindClosest(transHits, ray.Origin);
+            Shapes s = hitAfter.Shape;
+            switch (s) {
+                case Sphere:
+                    matAfter = scene.Spheres.get(hitAfter.Index).SphereMaterial;
+                    break;
+                case Plane:
+                    matAfter = scene.Planes.get(hitAfter.Index).PlaneMaterial;
+                    break;
+                default:
+                    matAfter = scene.Boxes.get(hitAfter.Index).BoxMaterial;
+                    break;
+            }
+            transparency = matAfter != null ? (float) matAfter.Transparency : 0.0F;
+            if (hitAfter == null || matAfter.Transparency == 0) {
+                return color;
+            }
+            color = mult(color, (1 - transparency));
+            normal = hitAfter != null ? hitAfter.Normal : null;
+            after = mult(CalcColor(scene, hitAfter, matAfter, normal, trans), transparency);
+            color = plus(color, after);
+            Ray rayAfter = new Ray(hitAfter.HitPoint, ray.Direction);
+            transHits = Hit.FindHits(rayAfter, scene);
+        }
         return color;
     }
     public static Color avgColor(List<Color> colors) {
