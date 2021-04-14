@@ -22,7 +22,7 @@ public class Plane {
 
     /*
             Calculate the offset for the soft shadow light plane
-             */
+
     public static double CalcOffset(Vector normal, Vector position){
         return (normal.X *(- position.X)) + (normal.Y *(- position.Y)) + (normal.Z *(- position.Z));
     }
@@ -32,7 +32,7 @@ public class Plane {
     Plane: aX + bY + cZ = -d
     if we are not parallel to an axis plane we can random values for x and y and calculate z.
     Make sure the point is not the P that we have
-     */
+
     public Vector FindPoint(Vector P){
         double x,y,z;
         Random r = new Random();
@@ -59,4 +59,6 @@ public class Plane {
         z = (-Offset + Normal.Y*y + Normal.X*x) / Normal.Z;
         return new Vector(x, y, z);
     }
+
+     */
 }

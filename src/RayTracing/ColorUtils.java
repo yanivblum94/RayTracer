@@ -84,7 +84,7 @@ public class ColorUtils {
             }
             double lightIntensity = SoftShadow.CalcLightIntensity(hit, scene, l);
             c = mult(l.LightColor,mat.DiffuseColor);
-            //c = mult(c,(float) lightIntensity);
+            c = mult(c,(float) lightIntensity);
             float nl =(float) Vector.DotProduct(normal, lightRay.Direction);
             nl = (float) Math.max(Math.abs(nl), 0.0);
             c = mult(c,nl);
@@ -107,7 +107,7 @@ public class ColorUtils {
         Vector lightTry = Vector.VectorSubtraction(lightRay.Origin,hit.HitPoint);
         lightTry.Normalize();
         double temp = Math.max(Vector.DotProduct(v,Vector.getReflection(lightTry,normal)),0);
-        temp = Math.pow(temp,mat.PhongSpecularityCoeffincient);//*lightIntensity;
+        temp = Math.pow(temp,mat.PhongSpecularityCoeffincient)*lightIntensity;
         Color c = mult(mat.SpecularColor,(float) (temp*light.SpecularIntensity));
         return c ;
     }
