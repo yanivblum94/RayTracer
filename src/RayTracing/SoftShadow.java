@@ -8,29 +8,26 @@ public class SoftShadow {
     public static double CalcLightIntensity(Hit hit, Scene scene, Light light) {//returns the light intensity from a specific light source in a hit point according to soft shadows method
         Random r = new Random();
         int raysCounter = 0;
-        Vector dir = Vector.VectorSubtraction(light.Position, hit.HitPoint);// normal to light plane is light - hit point
-        double offset = Plane.CalcOffset(dir, light.Position);// find the offset of the light plane
-        dir.Normalize();
-        Plane lightPlane = new Plane(dir, offset);
-        Vector otherPoint = lightPlane.FindPoint(light.Position);//find another point on the plane in order to find unit vectors that create the plane
-        Vector u = Vector.VectorSubtraction(otherPoint, light.Position); //u vector of light plane
-        u.Normalize();
-        Vector v = Vector.CrossProduct(dir, u); //v vector of light plane
-        v.Normalize();
+        Vector lightDir = Vector.VectorSubtraction(light.Position, hit.HitPoint);
+        lightDir.Normalize();
+        Ray lightRay = new Ray(light.Position, lightDir);
+        Vector [] axis = PerpPlane(light, lightRay);
+        Vector u = axis[0]; //u vector of light plane
+        Vector v = axis[1];; //v vector of light plane
         int rays = (int) Math.pow(scene.Settings.NumOfShadowRays, 2);//number of shadow rays totally shot
         double squareSize = light.LightRadius / (scene.Settings.NumOfShadowRays); //size of one square in the light plane
-        Vector temp = Vector.VectorAddition(Vector.ScalarMultiply(u, (scene.Settings.NumOfShadowRays * 0.5) * squareSize),
-                    Vector.ScalarMultiply(v, (scene.Settings.NumOfShadowRays * 0.5) * squareSize)); //like in the screen center, temp is 0.5*(u*height + v*width)
-        Vector s0 = Vector.VectorSubtraction(light.Position, temp); // bottom left corner square is center - temp
+        Vector temp = Vector.VectorAddition(Vector.ScalarMultiply(u, light.LightRadius),
+                    Vector.ScalarMultiply(v, light.LightRadius )); //like in the screen center, temp is (u*height + v*width)
+        Vector s0 = Vector.VectorSubtraction(light.Position, Vector.ScalarMultiply(temp, 0.5)); // bottom left corner square is center - 0.5temp
         Vector du = Vector.ScalarMultiply(u, squareSize);
         Vector dv = Vector.ScalarMultiply(v, squareSize);
         for (int row = 0; row < scene.Settings.NumOfShadowRays; row++) {
             for (int col = 0; col < scene.Settings.NumOfShadowRays; col++) {
                 Vector shift = Vector.VectorAddition(Vector.ScalarMultiply(du, col), Vector.ScalarMultiply(dv, row));
                 Vector currentSquare = Vector.VectorAddition(s0, shift);
-                Vector randomMove = GenerateRandomMoveVector(du, dv, squareSize);
+                Vector randomMove = GenerateRandomMoveVector(squareSize);//generates a random move vector within the square
                 Vector rayOrigin = Vector.VectorAddition(currentSquare, randomMove);
-                Ray ray = new Ray(rayOrigin, Vector.VectorSubtraction(rayOrigin, hit.HitPoint));//construct a ray from the square to the hit point
+                Ray ray = new Ray(rayOrigin, Vector.VectorSubtraction(hit.HitPoint, rayOrigin));//construct a ray from the square to the hit point
                 ray.Direction.Normalize();
                 List<Hit> hits = Hit.FindHits(ray, scene);//find all the objects the ray hits
                 if(hits.size() ==0){continue;}
@@ -45,7 +42,7 @@ public class SoftShadow {
     }
 
     //find a random shift vector inside the current square. moves at most (+-)0.5 square size in u and v directions. the random arg generates an number
-    public static Vector GenerateRandomMoveVector(Vector u, Vector v, double size){
+    public static Vector GenerateRandomMoveVector(double size){
         Random r = new Random();
         double moveU = r.nextDouble()*0.5; //generates a number between 0-0.5
         if(r.nextBoolean()){moveU = moveU*-1;} // randomizes + or -
@@ -53,7 +50,17 @@ public class SoftShadow {
         double moveV = r.nextDouble()*0.5; //generates a number between 0-0.5
         if(r.nextBoolean()){moveV = moveV*-1;} // randomizes + or -
         moveV = moveV * size;
-        return Vector.VectorAddition(Vector.ScalarMultiply(u,moveU), Vector.ScalarMultiply(v, moveV));
+        return new Vector(moveU, moveV, 0);
+    }
+
+    //find a perpendicular plane from the light and the ray
+    public static Vector[] PerpPlane(Light light, Ray ray){
+        double d = Vector.DotProduct(light.Position, ray.Direction);
+        Vector U = new Vector(1, 0, (-ray.Direction.X + d) / ray.Direction.Z);
+        Vector V = new Vector(1, 0, (-ray.Direction.Y + d) / ray.Direction.Z);
+        U.Normalize();
+        V.Normalize();
+        return new Vector[] {U, V };
     }
 }
 
