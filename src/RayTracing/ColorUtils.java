@@ -1,7 +1,6 @@
 package RayTracing;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 import static jdk.nashorn.internal.objects.NativeMath.max;
@@ -13,7 +12,7 @@ public class ColorUtils {
     on the indexes representing the pixel of the image
      */
     public static void GetColor(Hit hit, byte[] rgbData, int index, Scene scene, Ray ray) {
-        //naive implementation - just the colors from the formula without lights calculations
+        Color c = Color.black;
         Shapes s = hit.Shape;
         Vector normal = null;
         double red, green, blue;
@@ -22,6 +21,7 @@ public class ColorUtils {
             case Sphere:
                 mat = scene.Spheres.get(hit.Index).SphereMaterial;
                 normal = Vector.VectorSubtraction(hit.HitPoint, scene.Spheres.get(hit.Index).Center);
+                normal.Normalize();
                 break;
             case Plane:
                 mat = scene.Planes.get(hit.Index).PlaneMaterial;
@@ -38,7 +38,9 @@ public class ColorUtils {
         }
         //System.out.println("before getDiffuseColor");
         normal.Normalize();
-        getDeffuseColor(rgbData, scene, hit, mat, index, normal, ray);
+        c = getDiffuseColor(scene, hit, mat, index, normal, ray);
+        // ADD REflection & Transparency
+        setColor(rgbData,index, c);
         //System.out.println(count);
 
     }
@@ -47,23 +49,23 @@ public class ColorUtils {
     the background color as defined in the assignment
      */
     public static void GetBackgroundColor(byte[] rgbData, int index, Scene scene) {
+
         rgbData[index] = (byte) scene.Settings.BackgroundColor.getRed();
         rgbData[index + 1] = (byte) scene.Settings.BackgroundColor.getGreen();
         rgbData[index + 2] = (byte) scene.Settings.BackgroundColor.getBlue();
     }
 
-    public static void getDeffuseColor(byte[] rgbData, Scene scene, Hit hit, Material mat,
-                                       int index, Vector normal, Ray ray) {
+    public static Color getDiffuseColor(Scene scene, Hit hit, Material mat,
+                                        int index, Vector normal, Ray ray) {
         float red, green, blue;
         Color f = Color.black;
-        Color c = Color.black;
         for (Light l : scene.Lights) {
+            Color c = Color.black;
             Ray lightRay = new Ray(l.Position, Vector.VectorSubtraction(hit.HitPoint, l.Position));
             lightRay.Direction.Normalize();
             List<Hit> hits = Hit.FindHits(lightRay, scene);
             if (hits.size() == 0) { // case where light Ray hits nothing
-                setColor(rgbData, index, c);
-                return;
+                continue;
             }
             boolean isHit = true;
             float shadow = 1;//default val for NO shadow
@@ -73,28 +75,31 @@ public class ColorUtils {
                 count ++ ;
                 shadow =(float) (1-l.ShadowIntensity); //ass defined on assignment
             }
+            double lightIntesity = SoftShadow.CalcLightIntensity(hit, scene, l);
             c = mult(l.LightColor,mat.DiffuseColor);
+            c = mult(c,(float) lightIntesity);
             float nl =(float) Vector.DotProduct(normal, lightRay.Direction);
             nl = (float) Math.max(Math.abs(nl), 0.0);
             c = mult(c,nl);
             if(isHit){ // on Hit we add specular Color
-                c=plus(c,getSpectacularColor(scene,hit,mat,normal,l, lightRay,ray));
+                c=plus(c,getSpectacularColor(scene,hit,mat,normal,l, lightRay,ray,lightIntesity));
             }
             c =mult(c,shadow);
             //c = mult(c,(float)(1-mat.Transparency));
             f = plus(f,c);
         }
-        rgbData[index] = (byte) (f.getRed());
-        rgbData[index + 1] = (byte) (f.getGreen());
-        rgbData[index + 2] = (byte) (f.getBlue());
+        return f;
+
     }
 
     public static Color getSpectacularColor( Scene scene, Hit hit,Material mat,
-                                             Vector normal,Light light, Ray lightRay,Ray ray){
+                                             Vector normal,Light light, Ray lightRay,Ray ray, double lightIntesity){
         Vector v = Vector.VectorSubtraction(hit.HitPoint, scene.Camera.Position);// V goes from hitPoint -> eye
         v.Normalize();
-        double temp = Math.max(Vector.DotProduct(v,Vector.getReflection(lightRay.Direction,normal)),0);
-        temp = Math.pow(temp,mat.PhongSpecularityCoeffincient);
+        Vector lightTry = Vector.VectorSubtraction(lightRay.Origin,hit.HitPoint);
+        lightTry.Normalize();
+        double temp = Math.max(Vector.DotProduct(lightRay.Direction,Vector.getReflection(lightTry,normal)),0);
+        temp = Math.pow(temp,mat.PhongSpecularityCoeffincient)*lightIntesity;
         Color c = mult(mat.SpecularColor,(float) (temp*light.SpecularIntensity));
         return c ;
     }
