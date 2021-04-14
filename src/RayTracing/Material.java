@@ -17,11 +17,14 @@ public class Material {
     public double Transparency;
     public Color DiffuseColor ;
     public Color SpecularColor ;
+    public Color RelectionColor;
 
     public void setColors(){
         DiffuseColor =new Color((float)Math.min(1.0,DiffuseColorRed), (float)Math.min(1.0,DiffuseColorGreen)
                 , (float) Math.min(1.0,DiffuseColorBlue));
         SpecularColor = new Color((float)Math.min(1.0,SpecularColorRed), (float)Math.min(1.0,SpecularColorGreen)
                 , (float) Math.min(1.0,SpecularColorBlue));
+        RelectionColor = new Color((float)Math.min(1.0,ReflectionColorRed), (float)Math.min(1.0,ReflectionColorGreen)
+                , (float) Math.min(1.0,ReflectionColorBlue));
     }
 }
