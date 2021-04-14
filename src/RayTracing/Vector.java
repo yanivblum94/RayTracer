@@ -92,9 +92,9 @@ public class Vector {
     implemented by the formula on Shading13 PDF
      */
     public static Vector getReflection(Vector l, Vector n){
-        Vector temp = Vector.ScalarMultiply(l,2); // temp = 2L
-        double t = Vector.DotProduct(temp,n); // t = 2L*N
-        Vector r = Vector.ScalarMultiply(temp,t); // r = (2L*N)N
+        double t = Vector.DotProduct(l,n); // t = L*N
+        t = t*2; // t = 2L*N
+        Vector r = Vector.ScalarMultiply(n,t); // r = (2L*N)N
         r = Vector.VectorSubtraction(r,l); // r = (2L*N)N-L
         r.Normalize();
         return r;
