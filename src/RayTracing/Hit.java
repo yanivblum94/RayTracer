@@ -67,7 +67,7 @@ public class Hit {
                         res.add(hit);
                         continue;
                     }
-                    else if(roots[1] > 0){
+                    else if(roots.length >1 && roots[1] > 0){
                         Vector hitPoint = ray.tPointOnRay(roots[1]);
                         Hit hit = new Hit(hitPoint, Shapes.Sphere, scene.Spheres.indexOf(sphere));
                         hit.Normal = Vector.VectorSubtraction(scene.Spheres.get(hit.Index).Center, hitPoint);
