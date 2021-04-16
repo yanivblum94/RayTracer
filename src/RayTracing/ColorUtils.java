@@ -184,8 +184,8 @@ public class ColorUtils {
         Vector normal = hitAfter!= null ? hitAfter.Normal : null;
         Color after = mult(CalcColor(scene, hitAfter, matAfter, normal , trans), transparency);
         color = plus(color, after);
-        while(transHits.size() >0 && count < objects) {
-            hitAfter = Hit.FindClosest(transHits, ray.Origin);
+        while(transHits.size() >0 && count < objects/2) {
+            hitAfter = Hit.FindClosest(transHits, hitAfter.HitPoint);
             Shapes s = hitAfter.Shape;
             switch (s) {
                 case Sphere:
