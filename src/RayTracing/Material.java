@@ -18,6 +18,7 @@ public class Material {
     public Color DiffuseColor ;
     public Color SpecularColor ;
     public Color RelectionColor;
+    public double matAmbientReflection = 0.0;
 
     public void setColors(){
         DiffuseColor =new Color((float)Math.min(1.0,DiffuseColorRed), (float)Math.min(1.0,DiffuseColorGreen)
