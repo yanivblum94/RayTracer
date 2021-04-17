@@ -57,7 +57,7 @@ public class SoftShadow {
                             transHits = Hit.FindHits(transRay, scene);//find the next hits in same direction
                         }
                         raysCounter += partialRay;//add the partial ray that comes through
-                        System.out.println(raysCounter);
+                        //System.out.println(raysCounter);
                     }
                 }
             }
