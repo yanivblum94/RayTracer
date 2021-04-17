@@ -7,6 +7,7 @@ public class Hit {
     public Shapes Shape;
     public int Index;
     public Vector Normal;
+    public Shape Surface;
 
     public Hit(Vector hitPoint, Shapes shape, int index) {
         HitPoint = hitPoint;
@@ -54,6 +55,7 @@ public class Hit {
                     hit.Normal = Vector.VectorSubtraction(scene.Spheres.get(hit.Index).Center, hitPoint);
                     hit.Normal = Vector.ScalarMultiply(hit.Normal, -1);
                     hit.Normal.Normalize();
+                    hit.Surface = sphere;
                     res.add(hit);
                     continue;
                 }
@@ -64,6 +66,7 @@ public class Hit {
                         hit.Normal = Vector.VectorSubtraction(scene.Spheres.get(hit.Index).Center, hitPoint);
                         hit.Normal = Vector.ScalarMultiply(hit.Normal, -1);
                         hit.Normal.Normalize();
+                        hit.Surface = sphere;
                         res.add(hit);
                         continue;
                     }
@@ -73,6 +76,7 @@ public class Hit {
                         hit.Normal = Vector.VectorSubtraction(scene.Spheres.get(hit.Index).Center, hitPoint);
                         hit.Normal = Vector.ScalarMultiply(hit.Normal, -1);
                         hit.Normal.Normalize();
+                        hit.Surface = sphere;
                         res.add(hit);
                         continue;
                     }
@@ -109,6 +113,7 @@ public class Hit {
             Vector hitPoint = ray.tPointOnRay(t);
             Hit hit = new Hit(hitPoint, Shapes.Plane, scene.Planes.indexOf(pln));
             hit.Normal = pln.Normal;
+            hit.Surface = pln;
             res.add(hit);
         }
         return res;
@@ -121,6 +126,7 @@ public class Hit {
             List<Plane> planes = box.GenerateBoxPlanes();
             AbstractMap<Hit, Plane> hits = FindPlaneHitsForBox(ray, planes, scene.Materials.indexOf(box.BoxMaterial)); //finds all the hits with the box planes
             Hit hit = box.BoxHit(hits, ray);//checks if the ray hits the box, and return the closest hit if so
+            hit.Surface = box;
             if(hit != null){
                 res.add(hit);
             }
@@ -157,6 +163,18 @@ public class Hit {
             }
         }
         return res;
+    }
+
+    public Material GetMaterial(Scene scene){
+        Shapes s = this.Shape;
+        switch (s) {
+            case Sphere:
+                return scene.Spheres.get(this.Index).SphereMaterial;
+            case Plane:
+                return  scene.Planes.get(this.Index).PlaneMaterial;
+            default:
+                return scene.Boxes.get(this.Index).BoxMaterial;
+        }
     }
 /*
     public static boolean equal(Hit a, Hit b){
