@@ -7,7 +7,7 @@ public class SoftShadow {
 
     public static double CalcLightIntensity(Hit hit, Scene scene, Light light) {//returns the light intensity from a specific light source in a hit point according to soft shadows method
         Random r = new Random();
-        int raysCounter = 0;
+        double raysCounter = 0.0;
         Vector lightDir = Vector.VectorSubtraction(light.Position, hit.HitPoint);
         lightDir.Normalize();
         Ray lightRay = new Ray(light.Position, lightDir);
@@ -33,11 +33,36 @@ public class SoftShadow {
                 if(hits.size() ==0){continue;}
                 Hit closest = Hit.FindClosest(hits, rayOrigin);//find the closest hit
                 if(Math.abs(Vector.Distance(closest.HitPoint, hit.HitPoint)) < 0.001){ //if the closest hit to the light source is the hit point we are checking now then the ray hits
-                    raysCounter++;
+                    raysCounter = raysCounter + 1.0;
+                }
+                else{//bonus part taking into accounting transparent values
+                    Material mat = closest.GetMaterial(scene);
+                    double partialRay = 1.0; // a variable that sums which part of the ray continues
+                    if(mat.Transparency == 0.0){continue;}//if the material we hit is opaque, no light passes
+                    else{
+                        partialRay *= mat.Transparency;
+                        Vector epsilon = Vector.VectorAddition(hit.HitPoint, Vector.ScalarMultiply(ray.Direction, 0.001));
+                        Ray transRay = new Ray(epsilon, ray.Direction);//construct a ray from the hit point with same direction from light
+                        List<Hit> transHits = Hit.FindHits(transRay, scene);//find the next hits in same direction
+                        while(transHits.size() > 0){
+                            Hit closestTrans = Hit.FindClosest(transHits, transRay.Origin);//find the closest hit
+                            mat = closestTrans.GetMaterial(scene);//get the hit's material
+                            if(mat.Transparency == 0.0){
+                                partialRay = 0.0; //no light gets to the hitting point
+                                break;//if the material is opaque quit the while
+                            }
+                            partialRay *= mat.Transparency;
+                            epsilon = Vector.VectorAddition(closestTrans.HitPoint, Vector.ScalarMultiply(ray.Direction, 0.001));
+                            transRay = new Ray(epsilon, ray.Direction);//construct a ray from the hit point with same direction from light
+                            transHits = Hit.FindHits(transRay, scene);//find the next hits in same direction
+                        }
+                        raysCounter += partialRay;//add the partial ray that comes through
+                        //System.out.println(raysCounter);
+                    }
                 }
             }
         }
-        double ratio = ((double)raysCounter /(double) rays); //%of rays that hit the pont from the light source
+        double ratio = (raysCounter /(double) rays); //%of rays that hit the pont from the light source
         return ( (1- light.ShadowIntensity) + (light.ShadowIntensity * ratio) );//increase light intensity from each light source according to formula
     }
 
