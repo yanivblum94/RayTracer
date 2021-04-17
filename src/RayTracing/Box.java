@@ -3,8 +3,9 @@ package RayTracing;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class Box {
+public class Box extends Shape{
     public Vector Center;
     public double Scale;
     public Material BoxMaterial;
@@ -75,4 +76,16 @@ public class Box {
         return null;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Box box = (Box) o;
+        return Double.compare(box.Scale, Scale) == 0 && Center.equals(box.Center) && BoxMaterial.equals(box.BoxMaterial);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Center, Scale, BoxMaterial);
+    }
 }
