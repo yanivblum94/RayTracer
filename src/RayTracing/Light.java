@@ -15,4 +15,6 @@ public class Light {
     public void setColor(){
         LightColor =new Color((float)RedColor, (float)GreenColor, (float) BlueColor);
     }
+
+
 }

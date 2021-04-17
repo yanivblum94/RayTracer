@@ -1,6 +1,6 @@
 package RayTracing;
 
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.color.*;
 import java.awt.image.*;
 import java.io.BufferedReader;
@@ -134,6 +134,7 @@ public class RayTracer {
                     mat.ReflectionColorBlue = Double.parseDouble(params[8]);
                     mat.PhongSpecularityCoeffincient = Double.parseDouble(params[9]);
                     mat.Transparency = Double.parseDouble(params[10]);
+                    mat.ambientReflection = (params.length>11) ? Double.parseDouble(params[11]) : 0.0;
                     mat.setColors();
                     imageScene.Materials.add(mat);
                     System.out.println(String.format("Parsed material (line %d)", lineNum));
@@ -215,6 +216,7 @@ public class RayTracer {
         Vector p0 = Vector.VectorSubtraction(screenCenter, Vector.ScalarMultiply(temp, 0.5));
         imageScene.Camera.Dx = Vector.ScalarMultiply(imageScene.Camera.RightVector,pixel);
         imageScene.Camera.Dy = Vector.ScalarMultiply(imageScene.Camera.UpVector,pixel);
+        Color ambient = imageScene.getAmbientLighting();
         for(int row=0 ; row<this.imageHeight; row++){
             for(int col=0; col<this.imageWidth; col++){
                 Vector shift = Vector.VectorAddition(Vector.ScalarMultiply(imageScene.Camera.Dx,col), Vector.ScalarMultiply(imageScene.Camera.Dy,row));
@@ -248,7 +250,7 @@ public class RayTracer {
 
         long endTime = System.currentTimeMillis();
         Long renderTime = endTime - startTime;
-
+        System.out.println("Ambient Light parameters: Red = "+ambient.getRed()+" Green = "+ambient.getGreen()+" Blue = "+ambient.getBlue());
         System.out.println("Finished rendering scene in " + renderTime.toString() + " milliseconds.");
 
         // This is already implemented, and should work without adding any code.
