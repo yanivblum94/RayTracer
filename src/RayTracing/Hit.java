@@ -176,6 +176,15 @@ public class Hit {
                 return scene.Boxes.get(this.Index).BoxMaterial;
         }
     }
+
+    public static void RemoveSameShape(List<Hit> hits, Shape s){
+        for(Hit hit : hits){
+            if(hit.Shape.equals(s)){
+                hits.remove(hit);
+                continue;
+            }
+        }
+    }
 /*
     public static boolean equal(Hit a, Hit b){
 

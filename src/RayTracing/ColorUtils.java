@@ -21,7 +21,7 @@ public class ColorUtils {
 
         //System.out.println("before getDiffuseColor");
         c = CalcColor(scene, hit, mat, normal, ray);
-        //c = GetTransparency(hit, scene, mat, ray, c);
+        c = GetTransparency(hit, scene, mat, ray, c);
         Color ref = GetReflection(ray, hit, mat, scene.Settings.MaxRecursionLevels, scene);
         c = plus(c,ref);
         // ADD REflection & Transparency
@@ -34,7 +34,8 @@ public class ColorUtils {
         if(hit == null){
             return scene.Settings.BackgroundColor;
         }
-        Color res = getDiffuseColor(scene, hit, mat, normal, ray);
+        Color res = Color.BLACK;
+         res = plus(res, getDiffuseColor(scene, hit, mat, normal, ray));
         return res;
     }
     /* for a pixel which don't have a hit we define the colors using
@@ -103,8 +104,9 @@ public class ColorUtils {
         double dotProduct = 2.0 * Vector.DotProduct(ray.Direction, hitPoint.Normal);
         Vector normalDot = Vector.ScalarMultiply(hitPoint.Normal, dotProduct);
         Vector newRayDir =Vector.VectorSubtraction(ray.Direction, normalDot);
-        //newRayDir.Normalize();
-        Ray reflecionRay = new Ray(hitPoint.HitPoint, newRayDir);
+        newRayDir.Normalize();
+        Vector epsilon = Vector.VectorAddition(hitPoint.HitPoint, Vector.ScalarMultiply(newRayDir, 0.001));
+        Ray reflecionRay = new Ray(epsilon, newRayDir);
 
         List<Hit> reflectionHits = Hit.FindHits(reflecionRay, scene);
         Hit closestFromHit;
@@ -114,12 +116,13 @@ public class ColorUtils {
             newMat = null;
         }
         else {
-            closestFromHit = Hit.FindClosest(reflectionHits, ray.Origin);
+            //Hit.RemoveSameShape(reflectionHits, hitPoint.Surface);
+            closestFromHit = Hit.FindClosest(reflectionHits, reflecionRay.Origin);
             newMat = closestFromHit.GetMaterial(scene);
         }
         Vector norm = closestFromHit != null ? closestFromHit.Normal : null;
         Color color = CalcColor(scene, closestFromHit, newMat, norm, reflecionRay);
-        //color = GetTransparency(closestFromHit, scene, newMat, reflecionRay, color);
+        color = GetTransparency(closestFromHit, scene, newMat, reflecionRay, color);
         Color reflection = GetReflection(reflecionRay, closestFromHit, newMat, recursion-1, scene);
         color = plus(color, reflection);
         color = mult(color, mat.RelectionColor);
@@ -128,55 +131,39 @@ public class ColorUtils {
     }
 
     public static Color GetTransparency(Hit hit, Scene scene, Material currentMat, Ray ray, Color color){
-        if(hit == null || currentMat == null || currentMat.Transparency ==0.0){
+        if(hit == null || currentMat == null || currentMat.Transparency ==0.0){ // if the shape is not transparent
             return color;
         }
-        Shape currentSurface = hit.Surface;
-        Shape afterSurface = null;
-        int objects = scene.Planes.size() + scene.Spheres.size()*2 + scene.Boxes.size()*2;
-        int count = 0;
-        Ray transRay = new Ray(hit.HitPoint, ray.Direction);//construct a ray from the hit point in the same direction
-        List<Hit> transHits = Hit.FindHits(transRay, scene);
+        Vector epsilon = Vector.VectorAddition(hit.HitPoint, Vector.ScalarMultiply(ray.Direction, 0.00001));
+        Ray transRay = new Ray(epsilon, ray.Direction);//construct a ray from the hit point in the same direction
+        List<Hit> transHits = Hit.FindHits(transRay, scene); // find the hits after current hit point
         Material matAfter = null;
         Hit hitAfter =null;
         if(transHits.size() >0){
-            hitAfter = Hit.FindClosest(transHits, transRay.Origin);
-            matAfter = hitAfter.GetMaterial(scene);
-            afterSurface = hitAfter.Surface;
+            hitAfter = Hit.FindClosest(transHits, transRay.Origin); // the closest hit after the current one
+            matAfter = hitAfter.GetMaterial(scene); // the next material
         }
-        float transparency = (float) currentMat.Transparency;
+        float transparency = (float) currentMat.Transparency;//the current material trans parameter
+        //calculate the 1st layer according to formula
         color = mult(color, (1-transparency));
         Vector normal = hitAfter!= null ? hitAfter.Normal : null;
         Color after = mult(CalcColor(scene, hitAfter, matAfter, normal , transRay), transparency);
         color = plus(color, after);
-        while(transHits.size() >0 && count < objects/2) {
-            hitAfter = Hit.FindClosest(transHits, transRay.Origin);
-            matAfter = hitAfter.GetMaterial(scene);
-            afterSurface = hitAfter.Surface;
-            transparency = currentMat != null ? (float) currentMat.Transparency : 0.0F;
-            if (hitAfter == null || matAfter.Transparency == 0) {
+        while(transHits.size() > 0){
+            if(hitAfter == null || matAfter == null || matAfter.Transparency == 0.0){
                 return color;
             }
-            if(afterSurface.equals(currentSurface)){
-                transRay = new Ray(hitAfter.HitPoint, ray.Direction);
-                transHits = Hit.FindHits(transRay, scene);
-                if(transHits.size() >0){
-                    hitAfter = Hit.FindClosest(transHits, transRay.Origin);
-                    currentMat = hitAfter.GetMaterial(scene);
-                    currentSurface = hitAfter.Surface;
-                }
-                count++;
-                continue;
-            }
-            color = mult(color, (1 - transparency));
-            normal = hitAfter != null ? hitAfter.Normal : null;
-            after = mult(CalcColor(scene, hitAfter, matAfter, normal, transRay), transparency);
-            color = plus(color, after);
-            transRay = new Ray(hitAfter.HitPoint, ray.Direction);
+            transparency = (float) matAfter.Transparency;
+            epsilon = Vector.VectorAddition(hitAfter.HitPoint, Vector.ScalarMultiply(ray.Direction, 0.00001));
+            transRay = new Ray(epsilon, ray.Direction);//construct a ray from the hit point in the same direction
             transHits = Hit.FindHits(transRay, scene);
-            count++;
+            if(transHits.size() == 0){continue;}
+            color = mult(color,1- transparency);
+            hitAfter = Hit.FindClosest(transHits, transRay.Origin);
+            matAfter = hitAfter.GetMaterial(scene);
+            after = mult(CalcColor(scene, hitAfter, matAfter, hitAfter.Normal, transRay),transparency );
+            color = plus(color, after);
         }
-        //System.out.println("exited while in transRay");
         return color;
     }
     public static Color avgColor(List<Color> colors) {
