@@ -34,7 +34,8 @@ public class ColorUtils {
         if(hit == null){
             return scene.Settings.BackgroundColor;
         }
-        Color res = getDiffuseColor(scene, hit, mat, normal, ray);
+        Color res = Color.BLACK;
+         res = plus(res, getDiffuseColor(scene, hit, mat, normal, ray));
         return res;
     }
     /* for a pixel which don't have a hit we define the colors using
@@ -103,8 +104,9 @@ public class ColorUtils {
         double dotProduct = 2.0 * Vector.DotProduct(ray.Direction, hitPoint.Normal);
         Vector normalDot = Vector.ScalarMultiply(hitPoint.Normal, dotProduct);
         Vector newRayDir =Vector.VectorSubtraction(ray.Direction, normalDot);
-        //newRayDir.Normalize();
-        Ray reflecionRay = new Ray(hitPoint.HitPoint, newRayDir);
+        newRayDir.Normalize();
+        Vector epsilon = Vector.VectorAddition(hitPoint.HitPoint, Vector.ScalarMultiply(newRayDir, 0.001));
+        Ray reflecionRay = new Ray(epsilon, newRayDir);
 
         List<Hit> reflectionHits = Hit.FindHits(reflecionRay, scene);
         Hit closestFromHit;
@@ -114,7 +116,8 @@ public class ColorUtils {
             newMat = null;
         }
         else {
-            closestFromHit = Hit.FindClosest(reflectionHits, ray.Origin);
+            //Hit.RemoveSameShape(reflectionHits, hitPoint.Surface);
+            closestFromHit = Hit.FindClosest(reflectionHits, reflecionRay.Origin);
             newMat = closestFromHit.GetMaterial(scene);
         }
         Vector norm = closestFromHit != null ? closestFromHit.Normal : null;
