@@ -211,32 +211,51 @@ public class RayTracer {
         // Create a byte array to hold the pixel data:
         byte[] rgbData = new byte[this.imageWidth * this.imageHeight * 3];
         boolean isFish = imageScene.Settings.FishEyeLens;
-        imageScene.Camera.InitDirectionVectors();
+        //imageScene.Camera.InitDirectionVectors();
+        imageScene.Camera.UpVector.Normalize();
+        imageScene.Camera.UpVector = Vector.ScalarMultiply(imageScene.Camera.UpVector, -1);
+        //imageScene.Camera.LookAtPoint.Normalize();
+        Vector forward = Vector.VectorSubtraction(imageScene.Camera.Position, imageScene.Camera.LookAtPoint);
+        forward.Normalize();
+        Vector rightVector = Vector.CrossProduct(forward, imageScene.Camera.UpVector);
+        rightVector.Normalize();
         Vector screenCenter = Vector.VectorAddition(imageScene.Camera.Position,
-                Vector.ScalarMultiply(imageScene.Camera.TowardsVector, imageScene.Camera.ScreenDistance)) ;//screen center = position + distance*towards
-        Vector temp = Vector.VectorAddition(Vector.ScalarMultiply(imageScene.Camera.RightVector, (imageScene.Camera.ScreenWidth - pixel)),
-                Vector.ScalarMultiply(imageScene.Camera.UpVector, imageHeight/500 -pixel)); //temp = (width - pixel size) * Right Vector + (height - pixel size) * Up Vector
-        Vector p0 = Vector.VectorSubtraction(screenCenter, Vector.ScalarMultiply(temp, 0.5));
-        imageScene.Camera.Dx = Vector.ScalarMultiply(imageScene.Camera.RightVector,pixel);
-        imageScene.Camera.Dy = Vector.ScalarMultiply(imageScene.Camera.UpVector,pixel);
+                Vector.ScalarMultiply(forward, imageScene.Camera.ScreenDistance)) ;//screen center = position + distance*towards
+        //Vector temp = Vector.VectorAddition(Vector.ScalarMultiply(imageScene.Camera.RightVector, (imageScene.Camera.ScreenWidth - pixel)),
+                //Vector.ScalarMultiply(imageScene.Camera.UpVector, imageHeight/500 -pixel)); //temp = (width - pixel size) * Right Vector + (height - pixel size) * Up Vector
+        //Vector p0 = Vector.VectorSubtraction(screenCenter, Vector.ScalarMultiply(temp, 0.5));
+        //imageScene.Camera.Dx = Vector.ScalarMultiply(imageScene.Camera.RightVector,pixel);
+        //imageScene.Camera.Dy = Vector.ScalarMultiply(imageScene.Camera.UpVector,pixel);
+        Vector vp = Vector.CrossProduct(forward, rightVector);
+        vp.Normalize();
+        double pixelWidth = imageScene.Camera.ScreenWidth / (double)this.imageWidth;
+        double pixelHeight = (double)(this.imageWidth / this.imageHeight) * pixelWidth;
         Color ambient = imageScene.getAmbientLighting();
         for(int row=0 ; row<this.imageHeight; row++){
             for(int col=0; col<this.imageWidth; col++){
-                Vector shift = Vector.VectorAddition(Vector.ScalarMultiply(imageScene.Camera.Dx,col), Vector.ScalarMultiply(imageScene.Camera.Dy,row));
-                Vector currentPixel =   Vector.VectorAddition(p0, shift);
+                //Vector shift = Vector.VectorAddition(Vector.ScalarMultiply(imageScene.Camera.Dx,col), Vector.ScalarMultiply(imageScene.Camera.Dy,row));
+                //Vector currentPixel =   Vector.VectorAddition(p0, shift);
+                double xPixel = (double) col +0.5D;
+                double yPixel = (double) row + 0.5D;
+                double upDistance = (yPixel - (double)(this.imageHeight / 2)) * pixelHeight;
+                double rightDistance = (xPixel - (double)(this.imageWidth / 2)) * pixelWidth;
+                Vector upMove = Vector.ScalarMultiply(vp, upDistance);
+                Vector rightMove = Vector.ScalarMultiply(rightVector, rightDistance);
+                Vector currentPixel = Vector.VectorAddition(screenCenter, upMove);
+                currentPixel = Vector.VectorAddition(currentPixel, rightMove);
                 Ray ray;
                 if(!isFish)
                 {
-                    ray = new Ray(currentPixel, Vector.VectorSubtraction(currentPixel,imageScene.Camera.Position));
+                    ray = new Ray(imageScene.Camera.Position, Vector.VectorSubtraction(imageScene.Camera.Position, currentPixel));
                     ray.Direction.Normalize();//Normalize direction Vector
                 }
                 else{
-                    Vector fishDirection = CalcFishDirection(currentPixel, screenCenter, imageScene);
-                    if(fishDirection == null){
+                    ray = CalcFishDirection(currentPixel, screenCenter, imageScene);
+                    if(ray == null){
                         ColorUtils.setColor(rgbData, 3 * (col + row * this.imageWidth), Color.BLACK );
                         continue;
                     }
-                    ray = new Ray(imageScene.Camera.Position, fishDirection);
+                    //ray = new Ray(imageScene.Camera.Position, fishDirection);
                 }
                 List<Hit> hits = Hit.FindHits(ray, imageScene);
                 //System.out.println("number of hits for ray "+row+", "+col+ " : " + hits.size());
@@ -262,20 +281,20 @@ public class RayTracer {
 
     }
 
-    public Vector CalcFishDirection(Vector currentPixel, Vector screenCenter, Scene scene){
+    public Ray CalcFishDirection(Vector currentPixel, Vector screenCenter, Scene scene){
         Double r = Vector.Distance(currentPixel, screenCenter);
         Double theta = CalcTheta(r, scene);
-        System.out.println(theta);
-        if(theta > 90){
+        //System.out.println(theta);
+        if(Math.toDegrees(theta)  > 90){
             return null;
         }
         Vector v = Vector.VectorSubtraction(currentPixel,screenCenter);
         v.Normalize();
-        double rXip = scene.Camera.ScreenDistance * Math.tan(Math.toRadians(theta));
+        double rXip = scene.Camera.ScreenDistance * Math.tan(theta);
         Vector xip = Vector.VectorAddition(screenCenter,Vector.ScalarMultiply(v,rXip));
         Vector res = Vector.VectorSubtraction(xip, scene.Camera.Position);
         res.Normalize();
-        return res;
+        return new Ray(scene.Camera.Position, res);
     }
 
     // Theta is returned in degrees
@@ -287,9 +306,9 @@ public class RayTracer {
             return r / f;
         }
         else if(k <= 1 && k > 0) {
-            return Math.toDegrees(Math.atan(r / f_k)/ k);
+            return Math.atan(r / f_k) / k;
         }
-        return  Math.toDegrees(Math.asin(r / f_k)/ k);
+        return  Math.asin(r / f_k)/ k;
     }
 
 
