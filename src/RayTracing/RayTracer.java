@@ -26,10 +26,6 @@ public class RayTracer {
 
         try {
 
-            //Vector a = new Vector(1,3,-7);
-            //Vector b = new Vector(-2,3,4);
-           // System.out.println(Plane.CalcOffset(a,b));
-
             RayTracer tracer = new RayTracer();
 
             // Default values:
@@ -96,7 +92,6 @@ public class RayTracer {
 
                 if (code.equals("cam"))
                 {
-                    // Add code here to parse camera parameters
                     Camera cam = new Camera();
                     cam.Position = new Vector(Double.parseDouble(params[0]), Double.parseDouble(params[1]), Double.parseDouble(params[2]));
                     cam.LookAtPoint = new Vector(Double.parseDouble(params[3]), Double.parseDouble(params[4]), Double.parseDouble(params[5]));
@@ -113,7 +108,6 @@ public class RayTracer {
                 }
                 else if (code.equals("set"))
                 {
-                    // Add code here to parse general settings parameters
                     imageScene.Settings.BackgroundColorRed = Double.parseDouble(params[0]);
                     imageScene.Settings.BackgroundColorGreen = Double.parseDouble(params[1]);
                     imageScene.Settings.BackgroundColorBlue = Double.parseDouble(params[2]);
@@ -124,7 +118,6 @@ public class RayTracer {
                 }
                 else if (code.equals("mtl"))
                 {
-                    // Add code here to parse material parameters
                     Material mat = new Material();
                     mat.DiffuseColorRed = Double.parseDouble(params[0]);
                     mat.DiffuseColorGreen = Double.parseDouble(params[1]);
@@ -144,7 +137,6 @@ public class RayTracer {
                 }
                 else if (code.equals("sph"))
                 {
-                    // Add code here to parse sphere parameters
                     Sphere sph = new Sphere();
                     sph.Center = new Vector(Double.parseDouble(params[0]),Double.parseDouble(params[1]),Double.parseDouble(params[2]));
                     sph.Radius = Double.parseDouble(params[3]);
@@ -154,7 +146,6 @@ public class RayTracer {
                 }
                 else if (code.equals("pln"))
                 {
-                    // Add code here to parse plane parameters
                     Plane pln = new Plane();
                     pln.Normal = new Vector(Double.parseDouble(params[0]),Double.parseDouble(params[1]),Double.parseDouble(params[2]));
                     pln.Offset = Double.parseDouble(params[3]);
@@ -164,7 +155,6 @@ public class RayTracer {
                 }
                 else if (code.equals("box"))
                 {
-                    // Add code here to panew Vector(Double.parseDouble(params[0]),Double.parseDouble(params[1]),Double.parseDouble(params[2]));rse box parameters
                     Box box = new Box();
                     box.Center = new Vector(Double.parseDouble(params[0]),Double.parseDouble(params[1]),Double.parseDouble(params[2]));
                     box.Scale = Double.parseDouble(params[3]);
@@ -173,7 +163,6 @@ public class RayTracer {
                 }
                 else if (code.equals("lgt"))
                 {
-                    // Add code here to parse light parameters
                     Light lgt = new Light();
                     lgt.Position = new Vector(Double.parseDouble(params[0]),Double.parseDouble(params[1]),Double.parseDouble(params[2]));
                     lgt.RedColor = Double.parseDouble(params[3]);
@@ -193,8 +182,6 @@ public class RayTracer {
             }
         }
 
-        // It is recommended that you check here that the scene is valid,
-        // for example camera settings and all necessary materials were defined.
         imageScene.PixelSize = imageScene.Camera.ScreenWidth / this.imageWidth;
         System.out.println("Finished parsing scene file " + sceneFileName);
 
@@ -207,25 +194,16 @@ public class RayTracer {
     {
         System.out.println("started rendering");
         long startTime = System.currentTimeMillis();
-        double pixel = imageScene.Camera.ScreenWidth/imageWidth;
-        // Create a byte array to hold the pixel data:
         byte[] rgbData = new byte[this.imageWidth * this.imageHeight * 3];
         boolean isFish = imageScene.Settings.FishEyeLens;
-        //imageScene.Camera.InitDirectionVectors();
         imageScene.Camera.UpVector.Normalize();
         imageScene.Camera.UpVector = Vector.ScalarMultiply(imageScene.Camera.UpVector, -1);
-        //imageScene.Camera.LookAtPoint.Normalize();
         Vector forward = Vector.VectorSubtraction(imageScene.Camera.Position, imageScene.Camera.LookAtPoint);
         forward.Normalize();
         Vector rightVector = Vector.CrossProduct(forward, imageScene.Camera.UpVector);
         rightVector.Normalize();
         Vector screenCenter = Vector.VectorAddition(imageScene.Camera.Position,
                 Vector.ScalarMultiply(forward, imageScene.Camera.ScreenDistance)) ;//screen center = position + distance*towards
-        //Vector temp = Vector.VectorAddition(Vector.ScalarMultiply(imageScene.Camera.RightVector, (imageScene.Camera.ScreenWidth - pixel)),
-                //Vector.ScalarMultiply(imageScene.Camera.UpVector, imageHeight/500 -pixel)); //temp = (width - pixel size) * Right Vector + (height - pixel size) * Up Vector
-        //Vector p0 = Vector.VectorSubtraction(screenCenter, Vector.ScalarMultiply(temp, 0.5));
-        //imageScene.Camera.Dx = Vector.ScalarMultiply(imageScene.Camera.RightVector,pixel);
-        //imageScene.Camera.Dy = Vector.ScalarMultiply(imageScene.Camera.UpVector,pixel);
         Vector vp = Vector.CrossProduct(forward, rightVector);
         vp.Normalize();
         double pixelWidth = imageScene.Camera.ScreenWidth / (double)this.imageWidth;
@@ -233,8 +211,6 @@ public class RayTracer {
         Color ambient = imageScene.getAmbientLighting();
         for(int row=0 ; row<this.imageHeight; row++){
             for(int col=0; col<this.imageWidth; col++){
-                //Vector shift = Vector.VectorAddition(Vector.ScalarMultiply(imageScene.Camera.Dx,col), Vector.ScalarMultiply(imageScene.Camera.Dy,row));
-                //Vector currentPixel =   Vector.VectorAddition(p0, shift);
                 double xPixel = (double) col +0.5D;
                 double yPixel = (double) row + 0.5D;
                 double upDistance = (yPixel - (double)(this.imageHeight / 2)) * pixelHeight;
@@ -250,15 +226,13 @@ public class RayTracer {
                     ray.Direction.Normalize();//Normalize direction Vector
                 }
                 else{
-                    ray = CalcFishDirection(currentPixel, screenCenter, imageScene);
+                    ray = CalcFishRay(currentPixel, screenCenter, imageScene);
                     if(ray == null){
                         ColorUtils.setColor(rgbData, 3 * (col + row * this.imageWidth), Color.BLACK );
                         continue;
                     }
-                    //ray = new Ray(imageScene.Camera.Position, fishDirection);
                 }
                 List<Hit> hits = Hit.FindHits(ray, imageScene);
-                //System.out.println("number of hits for ray "+row+", "+col+ " : " + hits.size());
                 if(hits.size() == 0){// no hits - need background color
                     ColorUtils.GetBackgroundColor( rgbData, 3*(col+row*this.imageWidth),imageScene);
                 }
@@ -281,23 +255,22 @@ public class RayTracer {
 
     }
 
-    public Ray CalcFishDirection(Vector currentPixel, Vector screenCenter, Scene scene){
+    public Ray CalcFishRay(Vector currentPixel, Vector screenCenter, Scene scene){
         Double r = Vector.Distance(currentPixel, screenCenter);
         Double theta = CalcTheta(r, scene);
-        //System.out.println(theta);
         if(Math.toDegrees(theta)  > 90){
             return null;
         }
-        Vector v = Vector.VectorSubtraction(currentPixel,screenCenter);
+        Vector v = Vector.VectorSubtraction(currentPixel, screenCenter);
         v.Normalize();
         double rXip = scene.Camera.ScreenDistance * Math.tan(theta);
         Vector xip = Vector.VectorAddition(screenCenter,Vector.ScalarMultiply(v,rXip));
-        Vector res = Vector.VectorSubtraction(xip, scene.Camera.Position);
+        Vector res = Vector.VectorSubtraction(scene.Camera.Position,xip);
         res.Normalize();
         return new Ray(scene.Camera.Position, res);
     }
 
-    // Theta is returned in degrees
+    // Theta is returned in Radians
     public Double CalcTheta(double r, Scene scene){
         double k = scene.Camera.K;
         double f = scene.Camera.ScreenDistance;

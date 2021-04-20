@@ -35,13 +35,6 @@ public class Vector {
         v.Z = c * v.Z;
     }
 
-    /* function to calculate a vector given 2 points
-    Notice: the vector direction's is calculated towards Point b
-     */
-    public static Vector VectorByTwoPoints(Point a, Point b){
-        return new Vector(b.X-a.X, b.Y-a.Y, b.Z-a.Z);
-    }
-
     public static Vector VectorAddition(Vector v, Vector u){
         return new Vector(v.X+u.X,v.Y+u.Y,v.Z+u.Z);
     }
@@ -51,12 +44,12 @@ public class Vector {
     }
 
     public static double NormalVal(Vector v){
-        double temp = DotProduct(v,v);
+        double temp = Math.abs(DotProduct(v,v));
         return Math.sqrt(temp);
     }
 
     public static Vector NormalVector(Vector v){
-        double n = NormalVal(v);
+        double n = Math.abs(NormalVal(v));
         if(n==0){return  new Vector(0,0,0);}
         return new Vector((v.X)/n, (v.Y)/n, (v.Z)/n);
     }

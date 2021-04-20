@@ -185,11 +185,4 @@ public class Hit {
             }
         }
     }
-/*
-    public static boolean equal(Hit a, Hit b){
-
-        if(a.Shape )
-        return (a.HitPoint == b.HitPoint);
-    }
-*/
 }
