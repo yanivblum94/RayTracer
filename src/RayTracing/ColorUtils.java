@@ -3,30 +3,22 @@ package RayTracing;
 import java.awt.*;
 import java.util.List;
 
-import static jdk.nashorn.internal.objects.NativeMath.max;
-import static jdk.nashorn.internal.objects.NativeMath.min;
 
 public class ColorUtils {
-    public  static  int count =0;   // DELETE AT END
     /*function to calculate color of pixel by updating rgbData array
     on the indexes representing the pixel of the image
      */
     public static void GetColor(Hit hit, byte[] rgbData, int index, Scene scene, Ray ray) {
         Color c = Color.black;
         Shapes s = hit.Shape;
-        Vector normal = null;
-        double red, green, blue;
+        Vector normal;
         Material mat = hit.GetMaterial(scene);
         normal = hit.Normal;
-
-        //System.out.println("before getDiffuseColor");
         c = CalcColor(scene, hit, mat, normal, ray);
         c = GetTransparency(hit, scene, mat, ray, c);
         Color ref = GetReflection(ray, hit, mat, scene.Settings.MaxRecursionLevels, scene);
         c = plus(c,ref);
-        // ADD REflection & Transparency
         setColor(rgbData,index, c);
-        //System.out.println(count);
 
     }
 
@@ -35,7 +27,7 @@ public class ColorUtils {
             return scene.Settings.BackgroundColor;
         }
         Color res = Color.BLACK;
-         res = plus(res, getDiffuseColor(scene, hit, mat, normal, ray));
+         res = plus(res, getDiffuseColor(scene, hit, mat, normal));
         return res;
     }
     /* for a pixel which don't have a hit we define the colors using
@@ -49,7 +41,7 @@ public class ColorUtils {
     }
 
     public static Color getDiffuseColor(Scene scene, Hit hit, Material mat,
-                                       Vector normal, Ray ray) {
+                                       Vector normal) {
         Color f = Color.black;
         for (Light l : scene.Lights) {
             Color c = Color.black;
@@ -59,12 +51,9 @@ public class ColorUtils {
             if (hits.size() == 0) { // case where light Ray hits nothing
                 continue;
             }
-            boolean isHit = true;
             float shadow = 1;//default val for NO shadow
             double d = Vector.Distance(Hit.FindClosest(hits, lightRay.Origin).HitPoint,hit.HitPoint);
             if(Math.abs(d)>0.00001){//light hits object before ours
-                isHit = false;
-                count ++ ;
                 shadow =(float) (1-l.ShadowIntensity); //ass defined on assignment
             }
             double lightIntensity = SoftShadow.CalcLightIntensity(hit, scene, l);
@@ -74,11 +63,7 @@ public class ColorUtils {
             nl = (float) Math.max(Math.abs(nl), 0.0);
             c = mult(c,nl);
             c = plus(c,getSpectacularColor(scene,hit,mat,normal,l, lightRay,lightIntensity));
-            /*if(isHit){ // on Hit we add specular Color
-                c = plus(c,getSpectacularColor(scene,hit,mat,normal,l, lightRay,lightIntensity));
-            }*/
             c =mult(c,shadow);
-            //c = mult(c,(float)(1-mat.Transparency));
             f = plus(f,c);
         }
         return f;
@@ -116,7 +101,6 @@ public class ColorUtils {
             newMat = null;
         }
         else {
-            //Hit.RemoveSameShape(reflectionHits, hitPoint.Surface);
             closestFromHit = Hit.FindClosest(reflectionHits, reflecionRay.Origin);
             newMat = closestFromHit.GetMaterial(scene);
         }

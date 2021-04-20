@@ -17,9 +17,6 @@ public class Scene {
     public Vector Vy;
     public double PixelSize;
 
-
-    // to be continued
-    //public static Point FindP0();
     public void InitObjects(){
         this.Settings = new GeneralSettings();
         this.Materials = new ArrayList<Material>();
